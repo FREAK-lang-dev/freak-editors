@@ -8,4 +8,4 @@ schema_version = 1
 
 [grammars.freak]
 repository = "https://github.com/FREAK-lang-dev/tree-sitter-freak"
-rev = "047bee8"
+rev = "7022380"
