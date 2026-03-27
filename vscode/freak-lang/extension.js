@@ -1,103 +1,127 @@
 const vscode = require('vscode');
 const path = require('path');
-const { spawn } = require('child_process');
+const fs = require('fs');
+const { LanguageClient, TransportKind } = require('vscode-languageclient/node');
 
-let lspProcess = null;
-let outputChannel = null;
+let client = null;
 
-function activate(context) {
-    outputChannel = vscode.window.createOutputChannel('FREAK LSP');
+async function activate(context) {
+    const outputChannel = vscode.window.createOutputChannel('FREAK');
 
     const config = vscode.workspace.getConfiguration('freak');
     if (!config.get('lsp.enabled', true)) {
-        outputChannel.appendLine('FREAK LSP is disabled');
+        outputChannel.appendLine('FREAK LSP disabled in settings');
         return;
     }
 
-    const pythonPath = config.get('lsp.pythonPath', 'python');
+    // Find python
+    const pythonPath = config.get('lsp.pythonPath', '') || findPython();
+    if (!pythonPath) {
+        vscode.window.showErrorMessage('FREAK: Python not found. Install Python and set freak.lsp.pythonPath');
+        return;
+    }
+
+    // Find freak_lsp.py — bundled with the extension
     let serverPath = config.get('lsp.serverPath', '');
-
     if (!serverPath) {
-        // Auto-detect: look for freak_lsp.py relative to extension
-        const candidates = [
-            path.join(context.extensionPath, '..', '..', 'lsp', 'freak_lsp.py'),
-            path.join(context.extensionPath, 'freak_lsp.py'),
-        ];
-        for (const candidate of candidates) {
-            try {
-                require('fs').accessSync(candidate);
-                serverPath = candidate;
-                break;
-            } catch (e) {}
-        }
+        serverPath = path.join(context.extensionPath, 'freak_lsp.py');
     }
 
-    if (!serverPath) {
-        outputChannel.appendLine('Could not find freak_lsp.py. Set freak.lsp.serverPath in settings.');
-        vscode.window.showWarningMessage(
-            'FREAK LSP: freak_lsp.py not found. Install pygls (pip install pygls) and set freak.lsp.serverPath.'
-        );
+    if (!fs.existsSync(serverPath)) {
+        vscode.window.showErrorMessage(`FREAK: LSP server not found at ${serverPath}`);
         return;
     }
 
-    outputChannel.appendLine(`Starting FREAK LSP: ${pythonPath} ${serverPath}`);
+    outputChannel.appendLine(`Python: ${pythonPath}`);
+    outputChannel.appendLine(`Server: ${serverPath}`);
 
-    // Check if pygls is installed
-    const checkProcess = spawn(pythonPath, ['-c', 'import pygls; print("ok")']);
-    let checkOutput = '';
-    checkProcess.stdout.on('data', (data) => { checkOutput += data.toString(); });
-    checkProcess.on('close', (code) => {
-        if (code !== 0 || !checkOutput.includes('ok')) {
-            vscode.window.showWarningMessage(
-                'FREAK LSP requires pygls. Run: pip install pygls lsprotocol'
-            );
-            outputChannel.appendLine('pygls not installed. Run: pip install pygls lsprotocol');
+    // Ensure pygls is installed
+    const pyglsOk = await checkPygls(pythonPath, outputChannel);
+    if (!pyglsOk) {
+        const choice = await vscode.window.showWarningMessage(
+            'FREAK LSP needs pygls. Install it now?',
+            'Install', 'Cancel'
+        );
+        if (choice === 'Install') {
+            await installPygls(pythonPath, outputChannel);
+        } else {
+            outputChannel.appendLine('pygls not installed — LSP disabled');
             return;
         }
-        startLSP(context, pythonPath, serverPath);
+    }
+
+    // Start LSP
+    const serverOptions = {
+        command: pythonPath,
+        args: [serverPath, '--stdio'],
+        transport: TransportKind.stdio,
+    };
+
+    const clientOptions = {
+        documentSelector: [{ scheme: 'file', language: 'freak' }],
+        outputChannel: outputChannel,
+    };
+
+    client = new LanguageClient('freak-lsp', 'FREAK Language Server', serverOptions, clientOptions);
+
+    try {
+        await client.start();
+        outputChannel.appendLine('FREAK LSP started');
+        context.subscriptions.push({ dispose: () => client.stop() });
+    } catch (err) {
+        outputChannel.appendLine(`Failed to start LSP: ${err.message}`);
+        vscode.window.showErrorMessage(`FREAK LSP failed: ${err.message}`);
+    }
+}
+
+function findPython() {
+    // Try common Python names
+    const { execSync } = require('child_process');
+    for (const cmd of ['python3', 'python', 'py']) {
+        try {
+            execSync(`${cmd} --version`, { stdio: 'pipe', timeout: 5000 });
+            return cmd;
+        } catch (e) {}
+    }
+    return null;
+}
+
+function checkPygls(pythonPath, outputChannel) {
+    return new Promise((resolve) => {
+        const { exec } = require('child_process');
+        exec(`${pythonPath} -c "import pygls; import lsprotocol; print('ok')"`, { timeout: 10000 }, (err, stdout) => {
+            if (err || !stdout.includes('ok')) {
+                outputChannel.appendLine('pygls/lsprotocol not installed');
+                resolve(false);
+            } else {
+                outputChannel.appendLine('pygls OK');
+                resolve(true);
+            }
+        });
     });
 }
 
-function startLSP(context, pythonPath, serverPath) {
-    // Use vscode-languageclient if available, otherwise fall back to raw process
-    try {
-        const { LanguageClient, TransportKind } = require('vscode-languageclient/node');
+function installPygls(pythonPath, outputChannel) {
+    return new Promise((resolve) => {
+        const { exec } = require('child_process');
+        outputChannel.appendLine('Installing pygls and lsprotocol...');
+        outputChannel.show();
 
-        const serverOptions = {
-            command: pythonPath,
-            args: [serverPath, '--stdio'],
-            transport: TransportKind.stdio,
-        };
-
-        const clientOptions = {
-            documentSelector: [{ scheme: 'file', language: 'freak' }],
-            outputChannel: outputChannel,
-        };
-
-        const client = new LanguageClient('freak-lsp', 'FREAK Language Server', serverOptions, clientOptions);
-        client.start();
-        context.subscriptions.push({ dispose: () => client.stop() });
-        outputChannel.appendLine('FREAK LSP started (vscode-languageclient)');
-    } catch (e) {
-        // vscode-languageclient not installed, start raw process for basic functionality
-        outputChannel.appendLine('vscode-languageclient not found, starting raw LSP process');
-        outputChannel.appendLine('For full LSP support: npm install vscode-languageclient');
-
-        lspProcess = spawn(pythonPath, [serverPath, '--stdio']);
-        lspProcess.stderr.on('data', (data) => {
-            outputChannel.appendLine(`LSP stderr: ${data}`);
+        exec(`${pythonPath} -m pip install pygls lsprotocol`, { timeout: 60000 }, (err, stdout, stderr) => {
+            if (err) {
+                outputChannel.appendLine(`Install failed: ${stderr}`);
+                vscode.window.showErrorMessage('Failed to install pygls. Run manually: pip install pygls lsprotocol');
+            } else {
+                outputChannel.appendLine('pygls installed successfully');
+            }
+            resolve();
         });
-        lspProcess.on('close', (code) => {
-            outputChannel.appendLine(`LSP process exited with code ${code}`);
-        });
-        context.subscriptions.push({ dispose: () => { if (lspProcess) lspProcess.kill(); } });
-    }
+    });
 }
 
 function deactivate() {
-    if (lspProcess) {
-        lspProcess.kill();
-        lspProcess = null;
+    if (client) {
+        return client.stop();
     }
 }
 
