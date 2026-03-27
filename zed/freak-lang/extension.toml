@@ -1,5 +1,5 @@
-[package]
-name = "freak-lang"
+id = "freak-lang"
+name = "FREAK Language"
 version = "0.1.0"
 description = "FREAK language support for Zed — syntax highlighting, brackets, indentation"
 authors = ["FREAK Core Team"]
