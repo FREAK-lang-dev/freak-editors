@@ -12,6 +12,10 @@
   "engines": {
     "vscode": "^1.80.0"
   },
+  "activationEvents": [
+    "onLanguage:freak"
+  ],
+  "main": "./extension.js",
   "categories": [
     "Programming Languages",
     "Snippets"
@@ -48,6 +52,26 @@
         "language": "freak",
         "path": "./snippets/freak.json"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "FREAK",
+      "properties": {
+        "freak.lsp.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the FREAK language server (autocomplete, hover, diagnostics)"
+        },
+        "freak.lsp.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to Python interpreter for the LSP server"
+        },
+        "freak.lsp.serverPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to freak_lsp.py (auto-detected if empty)"
+        }
+      }
+    }
   }
 }
