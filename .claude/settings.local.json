@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(fk|freak\\)$\")",
+      "Bash(find /c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang -type f ! -path */.git/* -print)",
+      "Bash(git submodule:*)",
+      "Bash(npx tree-sitter:*)",
+      "Bash(git ls-remote:*)",
+      "Read(//c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/grammars/freak/$APPDATA/Zed/**)",
+      "Read(//c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/grammars/freak/$HOME/.config/zed/**)",
+      "Read(//c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/grammars/freak/$LOCALAPPDATA/Zed/**)",
+      "Read(//c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/grammars/freak/$APPDATA/**)"
+    ]
+  }
+}

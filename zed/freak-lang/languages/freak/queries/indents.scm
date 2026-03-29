@@ -3,11 +3,14 @@
 (block "{" @indent "}" @outdent)
 (block "{" @indent "done" @outdent)
 
-(shape_body "{" @indent "}" @outdent)
-(shape_body "{" @indent "done" @outdent)
+(shape_declaration "{" @indent "}" @outdent)
+(shape_declaration "{" @indent "done" @outdent)
 
-(impl_body "{" @indent "}" @outdent)
-(impl_body "{" @indent "done" @outdent)
+(impl_block "{" @indent "}" @outdent)
+(impl_block "{" @indent "done" @outdent)
 
-(route_body "{" @indent "}" @outdent)
-(route_body "{" @indent "done" @outdent)
+(route_declaration "{" @indent "}" @outdent)
+(route_declaration "{" @indent "done" @outdent)
+
+(when_statement "{" @indent "}" @outdent)
+(when_statement "{" @indent "done" @outdent)
