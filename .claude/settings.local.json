@@ -9,7 +9,12 @@
       "Read(//c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/grammars/freak/$APPDATA/Zed/**)",
       "Read(//c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/grammars/freak/$HOME/.config/zed/**)",
       "Read(//c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/grammars/freak/$LOCALAPPDATA/Zed/**)",
-      "Read(//c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/grammars/freak/$APPDATA/**)"
+      "Read(//c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/grammars/freak/$APPDATA/**)",
+      "Bash(python3 -c \":*)",
+      "Bash(CONFIGFILE=\"$APPDATA/tree-sitter/config.json\")",
+      "Read(//c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/grammars/freak/**)",
+      "Bash(cp /tmp/ts_config.json $CONFIGFILE)",
+      "Bash(for f:*)"
     ]
   }
 }
