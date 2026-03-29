@@ -14,7 +14,12 @@
       "Bash(CONFIGFILE=\"$APPDATA/tree-sitter/config.json\")",
       "Read(//c/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/grammars/freak/**)",
       "Bash(cp /tmp/ts_config.json $CONFIGFILE)",
-      "Bash(for f:*)"
+      "Bash(for f:*)",
+      "Bash(SRC=\"C:/Users/razva/Documents/GitHub/freak-editors/zed/freak-lang/languages/freak/queries\")",
+      "Bash(DST=\"$LOCALAPPDATA/Zed/extensions/installed/freak-lang/grammars/freak/queries\")",
+      "Bash(__NEW_LINE_39da77327a24f251__ for:*)",
+      "Bash(do)",
+      "Bash(cp \"$SRC/$f\" \"$DST/$f\")"
     ]
   }
 }
