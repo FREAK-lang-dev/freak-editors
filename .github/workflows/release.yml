@@ -1,0 +1,49 @@
+name: Release editor packages
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(cat VERSION)
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          test "$TAG" = "v$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+  editors:
+    needs: version
+    uses: ./.github/workflows/editor-packages.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      revision: ${{ github.sha }}
+  publish:
+    needs: editors
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: editor-packages
+          path: dist/
+      - run: cd dist && sha256sum --check SHA256SUMS
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/*.vsix
+            dist/*.zip
+            dist/SHA256SUMS

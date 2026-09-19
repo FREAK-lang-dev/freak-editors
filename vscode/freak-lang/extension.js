@@ -43,7 +43,8 @@ async function activate(context) {
             'Install', 'Cancel'
         );
         if (choice === 'Install') {
-            await installPygls(pythonPath, outputChannel);
+            const installed = await installPygls(pythonPath, path.join(context.extensionPath, 'requirements.txt'), outputChannel);
+            if (!installed) return;
         } else {
             outputChannel.appendLine('pygls not installed — LSP disabled');
             return;
@@ -88,8 +89,8 @@ function findPython() {
 
 function checkPygls(pythonPath, outputChannel) {
     return new Promise((resolve) => {
-        const { exec } = require('child_process');
-        exec(`${pythonPath} -c "import pygls; import lsprotocol; print('ok')"`, { timeout: 10000 }, (err, stdout) => {
+        const { execFile } = require('child_process');
+        execFile(pythonPath, ['-c', "from pygls.server import LanguageServer; import lsprotocol; print('ok')"], { timeout: 10000 }, (err, stdout) => {
             if (err || !stdout.includes('ok')) {
                 outputChannel.appendLine('pygls/lsprotocol not installed');
                 resolve(false);
@@ -101,20 +102,20 @@ function checkPygls(pythonPath, outputChannel) {
     });
 }
 
-function installPygls(pythonPath, outputChannel) {
+function installPygls(pythonPath, requirementsPath, outputChannel) {
     return new Promise((resolve) => {
-        const { exec } = require('child_process');
+        const { execFile } = require('child_process');
         outputChannel.appendLine('Installing pygls and lsprotocol...');
         outputChannel.show();
 
-        exec(`${pythonPath} -m pip install pygls lsprotocol`, { timeout: 60000 }, (err, stdout, stderr) => {
+        execFile(pythonPath, ['-m', 'pip', 'install', '-r', requirementsPath], { timeout: 60000 }, (err, stdout, stderr) => {
             if (err) {
                 outputChannel.appendLine(`Install failed: ${stderr}`);
-                vscode.window.showErrorMessage('Failed to install pygls. Run manually: pip install pygls lsprotocol');
+                vscode.window.showErrorMessage(`Failed to install FREAK LSP dependencies. Run: ${pythonPath} -m pip install -r "${requirementsPath}"`);
             } else {
                 outputChannel.appendLine('pygls installed successfully');
             }
-            resolve();
+            resolve(!err);
         });
     });
 }

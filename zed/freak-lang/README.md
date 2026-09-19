@@ -1,37 +1,37 @@
-# FREAK Language — Zed Extension
+# FREAK for Zed
 
-Syntax highlighting, bracket matching, indentation, and document outline for `.fk` files in Zed.
+Syntax highlighting, bracket matching, indentation, outline, comment toggling,
+and the same snippet library as the VS Code extension.
 
-## Install (dev mode)
+## Install
 
-1. Open Zed
-2. Open the command palette (`Ctrl+Shift+P`)
-3. Run **zed: install dev extension**
-4. Select the `editors/zed/freak-lang` directory from this repo
+1. Download `freak-zed-<version>.zip` from a
+   [freak-editors release](https://github.com/FREAK-lang-dev/freak-editors/releases)
+   or a FREAK language release that bundles it.
+2. Extract it into a permanent directory.
+3. In Zed, choose **Install Dev Extension** and select the extracted `freak-zed`
+   directory containing `extension.toml`.
 
-The extension will reload automatically when you edit files.
+Zed fetches the pinned grammar from `FREAK-lang-dev/tree-sitter-freak` and builds
+it. The first installation needs Git, internet access, and Zed's
+[grammar build prerequisites](https://zed.dev/docs/extensions/developing-extensions).
+Keep the extracted directory while installed. Updates use the same install flow
+with the new archive. This is a source extension, not a precompiled Gallery
+package; Gallery publication is separate.
 
-## Features
+Choose snippets such as `task`, `pilot`, `if`, `times`, `foreach`, `shape`, and
+`say` from the completion menu, then Tab between placeholders. This Zed extension
+does not yet launch the repository's Python LSP. Compiler-backed completion,
+diagnostics, and hover are not provided. The grammar covers common FREAK forms,
+not every V4 feature.
 
-- Full syntax highlighting (keywords, types, strings, annotations, etc.)
-- String interpolation support (`{expr}` inside double-quoted strings)
-- Rainbow bracket matching
-- Auto-indentation for blocks
-- Document outline (shapes, tasks, impls, routes, tests)
-- Comment toggling (`--`)
+## Develop
 
-## Publishing
-
-Once the tree-sitter grammar is hosted at `github.com/FREAK-lang-dev/tree-sitter-freak`:
-
-1. Update `extension.toml` with the correct `rev` (commit SHA)
-2. Submit to [Zed Extensions](https://github.com/zed-industries/extensions)
-
-## Building the Tree-sitter grammar
-
-```bash
-cd grammars/tree-sitter-freak
-npm install
-npx tree-sitter generate
-npx tree-sitter test
-```
+Build a local archive with `tools/package_editors.py` and install its extracted
+`freak-zed` directory. The raw checkout retains historical grammar build files
+under `zed/freak-lang/grammars/freak`; those collide with the Git clone directory
+Zed creates during a dev install, so use the staged archive for installation.
+Queries live beside `languages/freak/config.toml`. The manifest pins the upstream grammar revision;
+`python -u tests/editor_grammars.py --remote` verifies the grammar that Zed actually
+downloads. The bundled `grammars/freak` source can also be exercised by omitting
+`--remote`, but editing that copy alone does not update the installed grammar.
