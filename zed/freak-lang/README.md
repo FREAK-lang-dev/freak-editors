@@ -27,8 +27,11 @@ not every V4 feature.
 
 ## Develop
 
-Install `zed/freak-lang` directly from this repository. Queries live beside
-`languages/freak/config.toml`. The manifest pins the upstream grammar revision;
+Build a local archive with `tools/package_editors.py` and install its extracted
+`freak-zed` directory. The raw checkout retains historical grammar build files
+under `zed/freak-lang/grammars/freak`; those collide with the Git clone directory
+Zed creates during a dev install, so use the staged archive for installation.
+Queries live beside `languages/freak/config.toml`. The manifest pins the upstream grammar revision;
 `python -u tests/editor_grammars.py --remote` verifies the grammar that Zed actually
 downloads. The bundled `grammars/freak` source can also be exercised by omitting
 `--remote`, but editing that copy alone does not update the installed grammar.
