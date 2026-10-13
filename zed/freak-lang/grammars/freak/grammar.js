@@ -19,7 +19,7 @@ module.exports = grammar({
   ],
 
   rules: {
-    source_file: ($) => repeat($._statement),
+    source_file: ($) => repeat(choice($._statement, ";")),
 
     _statement: ($) =>
       choice(
@@ -37,8 +37,10 @@ module.exports = grammar({
         $.if_statement,
         $.when_statement,
         $.repeat_statement,
+        $.while_statement,
         $.training_arc,
         $.for_each_statement,
+        $.for_statement,
         $.eventually_block,
         $.trust_me_block,
         $.isekai_block,
@@ -58,7 +60,7 @@ module.exports = grammar({
     comment: ($) => token(seq("--", /.*/)),
 
     // ---- Blocks ----
-    block: ($) => seq("{", repeat($._statement), choice("}", "done")),
+    block: ($) => seq("{", repeat(choice($._statement, ";")), choice("}", "done")),
 
     // ---- Annotations ----
     annotation: ($) =>
@@ -68,6 +70,7 @@ module.exports = grammar({
     variable_declaration: ($) =>
       seq(
         "pilot",
+        optional("mut"),
         field("name", $.identifier),
         optional(seq(":", field("type", $._type))),
         "=",
@@ -75,7 +78,7 @@ module.exports = grammar({
       ),
 
     fixed_variable_declaration: ($) =>
-      seq("fixed", "pilot", field("name", $.identifier),
+      seq(choice("fixed", "grounded"), "pilot", field("name", $.identifier),
         optional(seq(":", field("type", $._type))),
         "=", field("value", $._expression)),
 
@@ -178,8 +181,10 @@ module.exports = grammar({
     // ---- Loops ----
     repeat_statement: ($) =>
       choice(
-        seq("repeat", field("count", $._expression), "times", field("body", $.block)),
+        seq("repeat", field("count", $._expression), "times",
+          optional(seq("with", field("counter", $.identifier))), field("body", $.block)),
         seq("repeat", "until", field("condition", $._expression), field("body", $.block)),
+        seq("repeat", "while", field("condition", $._expression), field("body", $.block)),
         seq("repeat", field("body", $.block)),
       ),
 
@@ -188,9 +193,21 @@ module.exports = grammar({
         optional(seq("from", field("from", $._expression), "to", field("to", $._expression))),
         field("body", $.block)),
 
+    while_statement: ($) =>
+      seq("while", field("condition", $._expression), field("body", $.block)),
+
     for_each_statement: ($) =>
       seq("for", "each", field("variable", $.identifier),
-        "in", field("iterable", $._expression), field("body", $.block)),
+        "in", field("iterable", $._expression),
+        optional(seq("step", field("step", $._expression))),
+        field("body", $.block)),
+
+    for_statement: ($) =>
+      seq("for", "(",
+        optional(field("initializer", choice($.variable_declaration, $._expression))), ";",
+        optional(field("condition", $._expression)), ";",
+        optional(field("update", $._expression)), ")",
+        field("body", $.block)),
 
     // ---- Special blocks ----
     eventually_block: ($) =>
@@ -265,6 +282,7 @@ module.exports = grammar({
         $.ok_expression,
         $.err_expression,
         $.binary_expression,
+        $.range_expression,
         $.unary_expression,
         $.call_expression,
         $.method_call,
@@ -298,12 +316,15 @@ module.exports = grammar({
     string_content: ($) => token.immediate(prec(-1, /[^"\\{]+/)),
 
     escape_sequence: ($) =>
-      token.immediate(seq("\\", choice("n", "r", "t", "\\", '"', "0", "{", "}"))),
+      token.immediate(seq("\\", choice("n", "r", "t", "\\", '"', "0", "{", "}",
+        /x[0-9a-fA-F]{2}/))),
 
     string_interpolation: ($) =>
       seq(token.immediate("{"), $._expression, "}"),
 
-    boolean: ($) => choice("true", "false", "yes", "no", "hai", "iie"),
+    boolean: ($) => choice("true", "false", "yes", "no", "hai", "iie",
+      "True", "False", "Yes", "No", "Hai", "Iie",
+      "TRUE", "FALSE", "YES", "NO", "HAI", "IIE"),
 
     mood_literal: ($) =>
       seq(".", choice("chill", "focused", "hype", "mono_no_aware", "muv_luv")),
@@ -325,6 +346,10 @@ module.exports = grammar({
           prec.left(p, seq(field("left", $._expression), field("operator", op), field("right", $._expression)))
         ),
       ),
+
+    range_expression: ($) =>
+      prec.left(2, seq(field("start", $._expression),
+        field("operator", choice("..", "..=")), field("end", $._expression))),
 
     unary_expression: ($) =>
       prec(8, seq(field("operator", choice("-", "not")), field("operand", $._expression))),

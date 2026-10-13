@@ -1,16 +1,16 @@
 ; FREAK — indentation rules for Zed
 
-(block "{" @indent "}" @outdent)
-(block "{" @indent "done" @outdent)
+(block "{" @start "}" @end) @indent
+(block "{" @start "done" @end) @indent
 
-(shape_declaration "{" @indent "}" @outdent)
-(shape_declaration "{" @indent "done" @outdent)
+(shape_declaration "{" @start "}" @end) @indent
+(shape_declaration "{" @start "done" @end) @indent
 
-(impl_block "{" @indent "}" @outdent)
-(impl_block "{" @indent "done" @outdent)
+(impl_block "{" @start "}" @end) @indent
+(impl_block "{" @start "done" @end) @indent
 
-(route_declaration "{" @indent "}" @outdent)
-(route_declaration "{" @indent "done" @outdent)
+(route_declaration "{" @start "}" @end) @indent
+(route_declaration "{" @start "done" @end) @indent
 
-(when_statement "{" @indent "}" @outdent)
-(when_statement "{" @indent "done" @outdent)
+(when_statement "{" @start "}" @end) @indent
+(when_statement "{" @start "done" @end) @indent

@@ -45,6 +45,7 @@
 "for" @keyword
 "lend" @keyword
 "mut" @keyword
+"grounded" @keyword
 "copy" @keyword
 
 ; ============================================================
@@ -57,6 +58,9 @@
 "repeat" @keyword.control
 "times" @keyword.control
 "until" @keyword.control
+"while" @keyword.control
+"with" @keyword.control
+"step" @keyword.control
 "training" @keyword.control
 "arc" @keyword.control
 "each" @keyword.control
@@ -180,6 +184,9 @@
 (for_each_statement
   variable: (identifier) @variable)
 
+(repeat_statement
+  counter: (identifier) @variable)
+
 ; ============================================================
 ;  Annotations
 ; ============================================================
@@ -193,6 +200,8 @@
 ; ============================================================
 
 "|>" @operator
+".." @operator
+"..=" @operator
 "->" @operator
 "?" @operator
 "=" @operator
@@ -224,6 +233,7 @@
 "}" @punctuation.bracket
 
 "," @punctuation.delimiter
+";" @punctuation.delimiter
 ":" @punctuation.delimiter
 "::" @punctuation.delimiter
 "." @punctuation.delimiter
