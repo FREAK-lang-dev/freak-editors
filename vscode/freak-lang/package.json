@@ -1,7 +1,7 @@
 {
   "name": "freak-lang",
   "displayName": "FREAK Language Support",
-  "description": "Syntax highlighting, snippets, and language support for the FREAK programming language (.fk files)",
+  "description": "Syntax highlighting, snippets, compiler commands, and language server support for the FREAK programming language (.fk files)",
   "version": "0.1.0",
   "publisher": "freak-lang-dev",
   "license": "MIT",
@@ -64,6 +64,16 @@
     "configuration": {
       "title": "FREAK",
       "properties": {
+        "freak.compilerPath": {
+          "type": "string",
+          "default": "freak",
+          "description": "Path to the freak compiler used by the Run/Build/Check/Test commands and compiler diagnostics"
+        },
+        "freak.diagnostics.compiler": {
+          "type": "boolean",
+          "default": true,
+          "description": "Report `freak check` errors in the editor when a file is opened or saved"
+        },
         "freak.lsp.enabled": {
           "type": "boolean",
           "default": true,
@@ -71,8 +81,8 @@
         },
         "freak.lsp.pythonPath": {
           "type": "string",
-          "default": "python",
-          "description": "Path to Python interpreter for the LSP server"
+          "default": "",
+          "description": "Path to Python interpreter for the LSP server (auto-detected if empty)"
         },
         "freak.lsp.serverPath": {
           "type": "string",
@@ -80,6 +90,120 @@
           "description": "Path to freak_lsp.py (auto-detected if empty)"
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "freak.runFile",
+        "title": "Run File",
+        "category": "FREAK",
+        "icon": "$(play)"
+      },
+      {
+        "command": "freak.buildFile",
+        "title": "Build File",
+        "category": "FREAK",
+        "icon": "$(tools)"
+      },
+      {
+        "command": "freak.checkFile",
+        "title": "Check File",
+        "category": "FREAK",
+        "icon": "$(check)"
+      },
+      {
+        "command": "freak.testProject",
+        "title": "Test Project",
+        "category": "FREAK",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "freak.restartServer",
+        "title": "Restart Language Server",
+        "category": "FREAK"
+      },
+      {
+        "command": "freak.showCommands",
+        "title": "Show Commands",
+        "category": "FREAK"
+      }
+    ],
+    "menus": {
+      "editor/title/run": [
+        {
+          "command": "freak.runFile",
+          "when": "resourceLangId == freak",
+          "group": "navigation@1"
+        },
+        {
+          "command": "freak.checkFile",
+          "when": "resourceLangId == freak",
+          "group": "navigation@2"
+        },
+        {
+          "command": "freak.buildFile",
+          "when": "resourceLangId == freak",
+          "group": "navigation@3"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "freak.runFile",
+          "when": "resourceExtname == .fk",
+          "group": "freak@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "freak.runFile",
+          "when": "editorLangId == freak"
+        },
+        {
+          "command": "freak.buildFile",
+          "when": "editorLangId == freak"
+        },
+        {
+          "command": "freak.checkFile",
+          "when": "editorLangId == freak"
+        }
+      ]
+    },
+    "taskDefinitions": [
+      {
+        "type": "freak",
+        "required": [
+          "command"
+        ],
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The freak subcommand: run, build, check, or test"
+          }
+        }
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "freak",
+        "owner": "freak",
+        "source": "freak",
+        "fileLocation": [
+          "autoDetect",
+          "${workspaceFolder}"
+        ],
+        "pattern": [
+          {
+            "regexp": "^(?:\u001b\\[[0-9;]*m)*(?:[a-z]+ )?(error|warning)(?:\u001b\\[[0-9;]*m)*: (.*)$",
+            "severity": 1,
+            "message": 2
+          },
+          {
+            "regexp": "^\\s*--> (.+):(\\d+):(\\d+)\\s*$",
+            "file": 1,
+            "line": 2,
+            "column": 3
+          }
+        ]
+      }
+    ]
   }
 }

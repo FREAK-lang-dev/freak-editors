@@ -14,4 +14,28 @@ task greet(name: word) -> void {
     }
 }
 
+-- FREAK 0.15.0 loops and bindings.
+task loops() -> void {
+    grounded pilot limit = 10
+    pilot n = 0
+    for each i in 0..=limit step 2 {
+        n += i
+    }
+    repeat 3 times with i {
+        n += i
+    }
+    for (pilot i = 0; i < 3; i += 1) {
+        n += 1
+    }
+    while n < 99 {
+        n += 1; continue
+    }
+    repeat while n < 120 {
+        n += 1
+    }
+    pilot ready = TRUE
+    say "braces \{n\} hold {n}"
+}
+
 greet("Takeru")
+loops()

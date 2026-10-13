@@ -2,7 +2,8 @@
 """Build release editor assets without modifying their source manifests.
 
 Requires Node.js and `npm ci`. Standalone versions come from VERSION; callers may supply a compiler release version.
-Zed retains its independently pinned tree-sitter-freak revision.
+Zed retains its independently pinned tree-sitter-freak revision. Lite XL plugins
+carry no version manifest; the version appears only in the archive name.
 """
 from __future__ import annotations
 
@@ -31,6 +32,13 @@ def copy_files(source: Path, destination: Path, names: list[str]) -> None:
         shutil.copyfile(source / name, target)
 
 
+def write_zip(archive_path: Path, stage: Path, root: Path) -> None:
+    with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as archive:
+        for path in sorted(root.rglob("*")):
+            if path.is_file():
+                archive.write(path, path.relative_to(stage).as_posix())
+
+
 def package(output: Path, version: str) -> list[Path]:
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
         raise SystemExit("Version must be major.minor.patch")
@@ -40,7 +48,8 @@ def package(output: Path, version: str) -> list[Path]:
     output = output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     assets = [output / f"freak-vscode-{version}.vsix",
-              output / f"freak-zed-{version}.zip"]
+              output / f"freak-zed-{version}.zip",
+              output / f"freak-litexl-{version}.zip"]
     with tempfile.TemporaryDirectory(prefix="freak-editors-") as temporary:
         stage = Path(temporary)
         vscode = stage / "vscode"
@@ -82,10 +91,17 @@ def package(output: Path, version: str) -> list[Path]:
         manifest_text = manifest_path.read_text(encoding="utf-8")
         manifest_text = re.sub(r'^version = ".*"$', f'version = "{version}"', manifest_text, flags=re.M)
         manifest_path.write_text(manifest_text, encoding="utf-8", newline="\n")
-        with zipfile.ZipFile(assets[1], "w", zipfile.ZIP_DEFLATED) as archive:
-            for path in sorted(zed.rglob("*")):
-                if path.is_file():
-                    archive.write(path, path.relative_to(stage).as_posix())
+        write_zip(assets[1], stage, zed)
+
+        # Lite XL loads plugins/language_freak/init.lua, so the archive root is
+        # the plugin directory itself.
+        litexl = stage / "language_freak"
+        copy_files(ROOT / "litexl", litexl, ["README.md"])
+        copy_files(ROOT / "litexl/language_freak", litexl, ["init.lua"])
+        shutil.copyfile(ROOT / "LICENSE", litexl / "LICENSE")
+        shutil.copyfile(ROOT / "lsp/freak_lsp.py", litexl / "freak_lsp.py")
+        shutil.copyfile(ROOT / "lsp/requirements.txt", litexl / "requirements.txt")
+        write_zip(assets[2], stage, litexl)
     checksums = "".join(f"{hashlib.sha256(asset.read_bytes()).hexdigest()}  {asset.name}\n" for asset in assets)
     (output / "SHA256SUMS").write_text(checksums, encoding="utf-8", newline="\n")
     return assets

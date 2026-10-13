@@ -22,7 +22,8 @@ package; Gallery publication is separate.
 Choose snippets such as `task`, `pilot`, `if`, `times`, `foreach`, `shape`, and
 `say` from the completion menu, then Tab between placeholders. This Zed extension
 does not yet launch the repository's Python LSP. Compiler-backed completion,
-diagnostics, and hover are not provided. The grammar covers common FREAK forms,
+diagnostics, and hover are not provided. The grammar covers common FREAK forms
+through the 0.15.0 loops (`while`, ranges with `step`, C-style `for`) and `grounded pilot`,
 not every V4 feature.
 
 ## Develop

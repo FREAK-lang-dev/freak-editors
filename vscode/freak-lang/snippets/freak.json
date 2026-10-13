@@ -94,7 +94,7 @@
     "prefix": "when",
     "body": [
       "when ${1:value} {",
-      "    ${2:pattern} => {",
+      "    ${2:pattern} -> {",
       "        $0",
       "    }",
       "}"
@@ -209,5 +209,77 @@
       "}"
     ],
     "description": "Unsafe block"
+  },
+  "While": {
+    "prefix": "while",
+    "body": [
+      "while ${1:condition} {",
+      "    $0",
+      "}"
+    ],
+    "description": "Loop while the condition holds"
+  },
+  "Repeat While": {
+    "prefix": "repeatwhile",
+    "body": [
+      "repeat while ${1:condition} {",
+      "    $0",
+      "}"
+    ],
+    "description": "Repeat while the condition holds"
+  },
+  "Repeat N Times With Counter": {
+    "prefix": "timeswith",
+    "body": [
+      "repeat ${1:n} times with ${2:i} {",
+      "    $0",
+      "}"
+    ],
+    "description": "Counted loop with a counter starting at 0"
+  },
+  "For Range": {
+    "prefix": "forrange",
+    "body": [
+      "for each ${1:i} in ${2:0}..${3:n} {",
+      "    $0",
+      "}"
+    ],
+    "description": "Range loop; the end is excluded (use ..= to include it)"
+  },
+  "For Range Step": {
+    "prefix": "forstep",
+    "body": [
+      "for each ${1:i} in ${2:0}..${3:n} step ${4:2} {",
+      "    $0",
+      "}"
+    ],
+    "description": "Range loop with a stride"
+  },
+  "For (C-style)": {
+    "prefix": "for",
+    "body": [
+      "for (pilot ${1:i} = ${2:0}; ${1:i} < ${3:n}; ${1:i} += 1) {",
+      "    $0",
+      "}"
+    ],
+    "description": "C-style loop"
+  },
+  "Grounded Pilot": {
+    "prefix": "grounded",
+    "body": [
+      "grounded pilot ${1:name} = ${2:value}"
+    ],
+    "description": "Immutable variable (same as fixed pilot)"
+  },
+  "Read Checked": {
+    "prefix": "readchecked",
+    "body": [
+      "pilot ${1:r} = fs::read_checked(${2:path})",
+      "check result ${1:r} {",
+      "    ok(${3:text}) -> { $0 }",
+      "    err(${4:e}) -> { say \"could not read: \" + ${4:e} }",
+      "}"
+    ],
+    "description": "Read a file, telling a missing one from an empty one"
   }
 }

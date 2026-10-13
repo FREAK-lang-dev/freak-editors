@@ -9,4 +9,4 @@ snippets = ["snippets/freak.json"]
 
 [grammars.freak]
 repository = "https://github.com/FREAK-lang-dev/tree-sitter-freak"
-rev = "04b9106bf1af3388c1d2a6f398b7c425ad4dea58"
+rev = "186ecf6344019574b0f59a968050c00c598e0b62"

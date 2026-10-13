@@ -63,6 +63,10 @@
           "named": true
         },
         {
+          "type": "for_statement",
+          "named": true
+        },
+        {
           "type": "foreshadow_declaration",
           "named": true
         },
@@ -132,6 +136,10 @@
         },
         {
           "type": "when_statement",
+          "named": true
+        },
+        {
+          "type": "while_statement",
           "named": true
         }
       ]
@@ -268,6 +276,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -371,6 +383,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -483,6 +499,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -650,6 +670,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -726,6 +750,10 @@
           "named": true
         },
         {
+          "type": "for_statement",
+          "named": true
+        },
+        {
           "type": "foreshadow_declaration",
           "named": true
         },
@@ -795,6 +823,10 @@
         },
         {
           "type": "when_statement",
+          "named": true
+        },
+        {
+          "type": "while_statement",
           "named": true
         }
       ]
@@ -909,6 +941,10 @@
           "named": true
         },
         {
+          "type": "range_expression",
+          "named": true
+        },
+        {
           "type": "shape_literal",
           "named": true
         },
@@ -1017,6 +1053,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -1145,6 +1185,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -1368,6 +1412,10 @@
           "named": true
         },
         {
+          "type": "range_expression",
+          "named": true
+        },
+        {
           "type": "shape_literal",
           "named": true
         },
@@ -1489,6 +1537,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -1598,6 +1650,10 @@
         },
         {
           "type": "propagation_expression",
+          "named": true
+        },
+        {
+          "type": "range_expression",
           "named": true
         },
         {
@@ -1771,6 +1827,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -1964,6 +2024,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -2086,6 +2150,120 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
+            "type": "shape_literal",
+            "named": true
+          },
+          {
+            "type": "some_expression",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "type_identifier",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          }
+        ]
+      },
+      "step": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "assignment",
+            "named": true
+          },
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "compound_assignment",
+            "named": true
+          },
+          {
+            "type": "err_expression",
+            "named": true
+          },
+          {
+            "type": "field_access",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "if_expression",
+            "named": true
+          },
+          {
+            "type": "index_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "list_literal",
+            "named": true
+          },
+          {
+            "type": "method_call",
+            "named": true
+          },
+          {
+            "type": "mood_literal",
+            "named": true
+          },
+          {
+            "type": "nobody_literal",
+            "named": true
+          },
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "ok_expression",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "pipe_expression",
+            "named": true
+          },
+          {
+            "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -2113,6 +2291,356 @@
         "types": [
           {
             "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "for_statement",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block",
+            "named": true
+          }
+        ]
+      },
+      "condition": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "assignment",
+            "named": true
+          },
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "compound_assignment",
+            "named": true
+          },
+          {
+            "type": "err_expression",
+            "named": true
+          },
+          {
+            "type": "field_access",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "if_expression",
+            "named": true
+          },
+          {
+            "type": "index_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "list_literal",
+            "named": true
+          },
+          {
+            "type": "method_call",
+            "named": true
+          },
+          {
+            "type": "mood_literal",
+            "named": true
+          },
+          {
+            "type": "nobody_literal",
+            "named": true
+          },
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "ok_expression",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "pipe_expression",
+            "named": true
+          },
+          {
+            "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
+            "named": true
+          },
+          {
+            "type": "shape_literal",
+            "named": true
+          },
+          {
+            "type": "some_expression",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "type_identifier",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          }
+        ]
+      },
+      "initializer": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "assignment",
+            "named": true
+          },
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "compound_assignment",
+            "named": true
+          },
+          {
+            "type": "err_expression",
+            "named": true
+          },
+          {
+            "type": "field_access",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "if_expression",
+            "named": true
+          },
+          {
+            "type": "index_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "list_literal",
+            "named": true
+          },
+          {
+            "type": "method_call",
+            "named": true
+          },
+          {
+            "type": "mood_literal",
+            "named": true
+          },
+          {
+            "type": "nobody_literal",
+            "named": true
+          },
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "ok_expression",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "pipe_expression",
+            "named": true
+          },
+          {
+            "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
+            "named": true
+          },
+          {
+            "type": "shape_literal",
+            "named": true
+          },
+          {
+            "type": "some_expression",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "type_identifier",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "variable_declaration",
+            "named": true
+          }
+        ]
+      },
+      "update": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "assignment",
+            "named": true
+          },
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "compound_assignment",
+            "named": true
+          },
+          {
+            "type": "err_expression",
+            "named": true
+          },
+          {
+            "type": "field_access",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "if_expression",
+            "named": true
+          },
+          {
+            "type": "index_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "list_literal",
+            "named": true
+          },
+          {
+            "type": "method_call",
+            "named": true
+          },
+          {
+            "type": "mood_literal",
+            "named": true
+          },
+          {
+            "type": "nobody_literal",
+            "named": true
+          },
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "ok_expression",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "pipe_expression",
+            "named": true
+          },
+          {
+            "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
+            "named": true
+          },
+          {
+            "type": "shape_literal",
+            "named": true
+          },
+          {
+            "type": "some_expression",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "type_identifier",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
             "named": true
           }
         ]
@@ -2360,6 +2888,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -2493,6 +3025,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -2654,6 +3190,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -2757,6 +3297,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -2986,6 +3530,10 @@
           "named": true
         },
         {
+          "type": "range_expression",
+          "named": true
+        },
+        {
           "type": "shape_literal",
           "named": true
         },
@@ -3107,6 +3655,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -3211,6 +3763,10 @@
         },
         {
           "type": "propagation_expression",
+          "named": true
+        },
+        {
+          "type": "range_expression",
           "named": true
         },
         {
@@ -3342,6 +3898,10 @@
         },
         {
           "type": "propagation_expression",
+          "named": true
+        },
+        {
+          "type": "range_expression",
           "named": true
         },
         {
@@ -3513,6 +4073,10 @@
           "named": true
         },
         {
+          "type": "range_expression",
+          "named": true
+        },
+        {
           "type": "shape_literal",
           "named": true
         },
@@ -3640,6 +4204,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -3743,6 +4311,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -3895,6 +4467,250 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
+            "type": "shape_literal",
+            "named": true
+          },
+          {
+            "type": "some_expression",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "type_identifier",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "range_expression",
+    "named": true,
+    "fields": {
+      "end": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "assignment",
+            "named": true
+          },
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "compound_assignment",
+            "named": true
+          },
+          {
+            "type": "err_expression",
+            "named": true
+          },
+          {
+            "type": "field_access",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "if_expression",
+            "named": true
+          },
+          {
+            "type": "index_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "list_literal",
+            "named": true
+          },
+          {
+            "type": "method_call",
+            "named": true
+          },
+          {
+            "type": "mood_literal",
+            "named": true
+          },
+          {
+            "type": "nobody_literal",
+            "named": true
+          },
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "ok_expression",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "pipe_expression",
+            "named": true
+          },
+          {
+            "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
+            "named": true
+          },
+          {
+            "type": "shape_literal",
+            "named": true
+          },
+          {
+            "type": "some_expression",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "type_identifier",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          }
+        ]
+      },
+      "operator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "..",
+            "named": false
+          },
+          {
+            "type": "..=",
+            "named": false
+          }
+        ]
+      },
+      "start": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "assignment",
+            "named": true
+          },
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "compound_assignment",
+            "named": true
+          },
+          {
+            "type": "err_expression",
+            "named": true
+          },
+          {
+            "type": "field_access",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "if_expression",
+            "named": true
+          },
+          {
+            "type": "index_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "list_literal",
+            "named": true
+          },
+          {
+            "type": "method_call",
+            "named": true
+          },
+          {
+            "type": "mood_literal",
+            "named": true
+          },
+          {
+            "type": "nobody_literal",
+            "named": true
+          },
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "ok_expression",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "pipe_expression",
+            "named": true
+          },
+          {
+            "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -4017,6 +4833,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -4123,6 +4943,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -4140,6 +4964,16 @@
           },
           {
             "type": "unary_expression",
+            "named": true
+          }
+        ]
+      },
+      "counter": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "identifier",
             "named": true
           }
         ]
@@ -4232,6 +5066,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -4396,6 +5234,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -4581,6 +5423,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -4719,6 +5565,10 @@
           "named": true
         },
         {
+          "type": "range_expression",
+          "named": true
+        },
+        {
           "type": "shape_literal",
           "named": true
         },
@@ -4744,7 +5594,6 @@
   {
     "type": "source_file",
     "named": true,
-    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -4792,6 +5641,10 @@
         },
         {
           "type": "for_each_statement",
+          "named": true
+        },
+        {
+          "type": "for_statement",
           "named": true
         },
         {
@@ -4864,6 +5717,10 @@
         },
         {
           "type": "when_statement",
+          "named": true
+        },
+        {
+          "type": "while_statement",
           "named": true
         }
       ]
@@ -4978,6 +5835,10 @@
         },
         {
           "type": "propagation_expression",
+          "named": true
+        },
+        {
+          "type": "range_expression",
           "named": true
         },
         {
@@ -5138,6 +5999,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -5251,6 +6116,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -5389,6 +6258,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -5569,6 +6442,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -5682,6 +6559,10 @@
           },
           {
             "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
             "named": true
           },
           {
@@ -5835,6 +6716,10 @@
             "named": true
           },
           {
+            "type": "range_expression",
+            "named": true
+          },
+          {
             "type": "shape_literal",
             "named": true
           },
@@ -5866,6 +6751,132 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "while_statement",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block",
+            "named": true
+          }
+        ]
+      },
+      "condition": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "assignment",
+            "named": true
+          },
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "call_expression",
+            "named": true
+          },
+          {
+            "type": "compound_assignment",
+            "named": true
+          },
+          {
+            "type": "err_expression",
+            "named": true
+          },
+          {
+            "type": "field_access",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "if_expression",
+            "named": true
+          },
+          {
+            "type": "index_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "list_literal",
+            "named": true
+          },
+          {
+            "type": "method_call",
+            "named": true
+          },
+          {
+            "type": "mood_literal",
+            "named": true
+          },
+          {
+            "type": "nobody_literal",
+            "named": true
+          },
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "ok_expression",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "pipe_expression",
+            "named": true
+          },
+          {
+            "type": "propagation_expression",
+            "named": true
+          },
+          {
+            "type": "range_expression",
+            "named": true
+          },
+          {
+            "type": "shape_literal",
+            "named": true
+          },
+          {
+            "type": "some_expression",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "type_identifier",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -5925,6 +6936,14 @@
     "named": false
   },
   {
+    "type": "..",
+    "named": false
+  },
+  {
+    "type": "..=",
+    "named": false
+  },
+  {
     "type": "/",
     "named": false
   },
@@ -5974,6 +6993,54 @@
   },
   {
     "type": "@",
+    "named": false
+  },
+  {
+    "type": "FALSE",
+    "named": false
+  },
+  {
+    "type": "False",
+    "named": false
+  },
+  {
+    "type": "HAI",
+    "named": false
+  },
+  {
+    "type": "Hai",
+    "named": false
+  },
+  {
+    "type": "IIE",
+    "named": false
+  },
+  {
+    "type": "Iie",
+    "named": false
+  },
+  {
+    "type": "NO",
+    "named": false
+  },
+  {
+    "type": "No",
+    "named": false
+  },
+  {
+    "type": "TRUE",
+    "named": false
+  },
+  {
+    "type": "True",
+    "named": false
+  },
+  {
+    "type": "YES",
+    "named": false
+  },
+  {
+    "type": "Yes",
     "named": false
   },
   {
@@ -6105,6 +7172,10 @@
     "named": false
   },
   {
+    "type": "grounded",
+    "named": false
+  },
+  {
     "type": "hai",
     "named": false
   },
@@ -6217,6 +7288,10 @@
     "named": false
   },
   {
+    "type": "step",
+    "named": false
+  },
+  {
     "type": "string_content",
     "named": true
   },
@@ -6277,8 +7352,16 @@
     "named": false
   },
   {
+    "type": "while",
+    "named": false
+  },
+  {
     "type": "wildcard_pattern",
     "named": true
+  },
+  {
+    "type": "with",
+    "named": false
   },
   {
     "type": "word",

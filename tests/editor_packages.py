@@ -24,6 +24,12 @@ def verify(artifacts: Path, version: str) -> None:
             assert ".fk" in item["extensions"]
             for filename in [item["configuration"], *item["icon"].values()]:
                 assert "extension/" + filename.removeprefix("./") in names
+        declared = {item["command"] for item in manifest["contributes"]["commands"]}
+        client = archive.read("extension/extension.js").decode()
+        for menu in manifest["contributes"]["menus"].values():
+            assert {item["command"] for item in menu} <= declared
+        for command in declared:
+            assert f"'{command}'" in client, command
         for kind in ("grammars", "snippets"):
             for item in manifest["contributes"][kind]:
                 assert "extension/" + item["path"].removeprefix("./") in names
@@ -53,10 +59,24 @@ def verify(artifacts: Path, version: str) -> None:
             assert archive.read(f"freak-zed/languages/freak/{name}.scm")
         assert archive.read("freak-zed/LICENSE")
 
+    with zipfile.ZipFile(artifacts / f"freak-litexl-{version}.zip") as archive:
+        names = set(archive.namelist())
+        assert names == {f"language_freak/{name}" for name in (
+            "init.lua", "freak_lsp.py", "requirements.txt", "README.md", "LICENSE")}, names
+        plugin = archive.read("language_freak/init.lua").decode()
+        assert plugin.startswith("-- mod-version:3")
+        assert 'files = { "%.fk$" }' in plugin and '"freak_lsp.py"' in plugin
+        assert archive.read("language_freak/freak_lsp.py") == (ROOT / "lsp/freak_lsp.py").read_bytes()
+        assert archive.read("language_freak/requirements.txt") == (ROOT / "lsp/requirements.txt").read_bytes()
+
+    sums = (artifacts / "SHA256SUMS").read_text(encoding="utf-8").split()[1::2]
+    assert sums == [f"freak-vscode-{version}.vsix", f"freak-zed-{version}.zip",
+                    f"freak-litexl-{version}.zip"], sums
+
     for editor in ("vscode", "zed"):
         source = ROOT / f"{editor}/freak-lang/snippets/freak.json"
         assert snippets == json.loads(source.read_text(encoding="utf-8"))
-    assert len(snippets) >= 24, "Preserve the existing editors repository snippets"
+    assert len(snippets) >= 32, "Preserve the existing editors repository snippets"
     print(f"Editor artifact contracts passed for {version}")
 
 
