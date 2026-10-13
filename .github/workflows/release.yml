@@ -1,35 +1,67 @@
 name: Release editor packages
 
+# A push to main releases VERSION when no v<VERSION> tag exists yet, so bumping
+# VERSION in a merged pull request is what publishes. Pushing the tag by hand
+# still works and releases the tagged commit.
 on:
   push:
+    branches: [main]
     tags: ['v*']
 
 permissions:
   contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   version:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.version.outputs.release }}
     steps:
       - uses: actions/checkout@v4
       - id: version
         env:
-          TAG: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           version=$(cat VERSION)
           [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
-          test "$TAG" = "v$version"
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          release=true
+          if [[ "$REF_TYPE" == tag ]]; then
+            test "$REF_NAME" = "v$version"
+          else
+            # Exit status 2 means the tag is absent; anything else is a failure.
+            status=0
+            git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null || status=$?
+            case "$status" in
+              0) release=false ;;
+              2) ;;
+              *) exit "$status" ;;
+            esac
+          fi
+          # Never rebuild over a published release's assets.
+          if gh release view "v$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            release=false
+          fi
+          if [[ "$release" == false ]]; then
+            echo "v$version is already released; nothing to publish."
+          fi
+          echo "release=$release" >> "$GITHUB_OUTPUT"
   editors:
     needs: version
+    if: needs.version.outputs.release == 'true'
     uses: ./.github/workflows/editor-packages.yml
     with:
       version: ${{ needs.version.outputs.version }}
       revision: ${{ github.sha }}
   publish:
-    needs: editors
+    needs: [version, editors]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -41,6 +73,9 @@ jobs:
       - run: cd dist && sha256sum --check SHA256SUMS
       - uses: softprops/action-gh-release@v2
         with:
+          # On a main push this creates the tag at the released commit.
+          tag_name: v${{ needs.version.outputs.version }}
+          target_commitish: ${{ github.sha }}
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |

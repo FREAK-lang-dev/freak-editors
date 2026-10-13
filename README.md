@@ -47,9 +47,13 @@ copies under `vscode/freak-lang` remain for direct extension development.
 
 ## Release ownership
 
-`VERSION` controls standalone editor releases. Push a matching `v<version>` tag
-to build, test, checksum, and publish all three downloads in this repository. No tag or
-release is created by building locally.
+`VERSION` controls standalone editor releases. When a push to `main` carries a
+`VERSION` that has no `v<version>` tag yet, the release workflow builds, tests,
+checksums, and publishes all three downloads and creates the tag at that commit;
+merging a pull request that bumps `VERSION` is therefore what releases. Pushing
+a matching `v<version>` tag by hand does the same for the tagged commit. A
+version that already has a release is never rebuilt. No tag or release is
+created by building locally.
 
 FREAK language releases call `.github/workflows/editor-packages.yml` at a pinned
 commit, supplying `version` (the compiler release version) and `revision` (the same
