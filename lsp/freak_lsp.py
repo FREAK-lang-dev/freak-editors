@@ -401,7 +401,22 @@ def did_change(params: lsp.DidChangeTextDocumentParams):
             text = _apply_incremental_change(text, change_range, change.text)
     documents[uri] = text
     doc_symbols[uri] = scan_document(text)
+    # Compiler results describe the saved text; drop them and any check in flight.
+    with _check_lock:
+        _check_generation[uri] = _check_generation.get(uri, 0) + 1
+        compiler_diagnostics.pop(uri, None)
     _publish_diagnostics(uri, text)
+
+
+def _utf16_to_index(line: str, units: int) -> int:
+    """Convert an LSP character offset (UTF-16 code units) to a string index."""
+    index = 0
+    for ch in line:
+        if units <= 0:
+            break
+        units -= 2 if ord(ch) > 0xFFFF else 1
+        index += 1
+    return index
 
 
 def _apply_incremental_change(old: str, change_range, new_text: str) -> str:
@@ -411,7 +426,7 @@ def _apply_incremental_change(old: str, change_range, new_text: str) -> str:
 
     def to_offset(line: int, character: int) -> int:
         line = max(0, min(line, len(lines) - 1))
-        character = max(0, min(character, len(lines[line])))
+        character = _utf16_to_index(lines[line], character)
         return sum(len(lines[i]) + 1 for i in range(line)) + character
 
     start_off = to_offset(start.line, start.character)
@@ -561,9 +576,11 @@ def completion(params: lsp.CompletionParams) -> lsp.CompletionList:
             ))
 
     frag = _completion_fragment(prefix)
-    if frag:
-        lowered = frag.lower()
-        items = [it for it in items if (it.label or "").lower().startswith(lowered)]
+    current = frag.rsplit(" ", 1)[-1]
+    if current:
+        phrase = frag.strip()
+        items = [it for it in items
+                 if (it.label or "").lower().startswith((current, phrase))]
 
     return lsp.CompletionList(is_incomplete=False, items=items)
 
@@ -571,8 +588,9 @@ def completion(params: lsp.CompletionParams) -> lsp.CompletionList:
 def _completion_fragment(prefix: str) -> str:
     """Trailing word run the user is typing (letters, digits, _, space, comma).
 
-    Spaces are kept so multi-word keywords (give back, trust me, ...) filter
-    correctly; anything else (brackets, quotes, dots) ends the fragment.
+    Spaces are kept so multi-word keywords (give back, trust me, ...) can
+    match as a phrase; anything else (brackets, quotes, dots) ends the
+    fragment. A trailing space means no token has been started yet.
     """
     run = []
     for ch in reversed(prefix):
@@ -580,7 +598,7 @@ def _completion_fragment(prefix: str) -> str:
             run.append(ch)
         else:
             break
-    return "".join(reversed(run)).strip().lower()
+    return "".join(reversed(run)).lstrip().lower()
 
 
 def _scope_completions(prefix: str, uri: str) -> list[lsp.CompletionItem]:
@@ -842,11 +860,16 @@ def definition(params: lsp.DefinitionParams) -> Optional[lsp.Location]:
     syms = doc_symbols.get(uri)
     if not word or not syms:
         return None
+    here = params.position.line
+    # A local shadows a same-named declaration: take the nearest pilot at or
+    # above the reference, then file-level declarations, then any pilot.
+    pilots = sorted(line for n, _, line in syms.fixed + syms.pilots if n == word)
     declared = (
-        [(t[0], t[3]) for t in syms.tasks]
+        [(word, line) for line in reversed(pilots) if line <= here]
+        + [(t[0], t[3]) for t in syms.tasks]
         + [(s[0], s[1]) for s in syms.shapes]
         + list(syms.doctrines) + list(syms.routes)
-        + [(n, line) for n, _, line in syms.fixed + syms.pilots]
+        + [(word, line) for line in pilots]
     )
     for name, line in declared:
         if name == word:
@@ -1043,11 +1066,14 @@ def parse_compiler_output(output: str, path: str, text: str) -> list[lsp.Diagnos
         line, col = int(at.group(2)) - 1, int(at.group(3)) - 1
         there = os.path.normcase(os.path.abspath(
             os.path.join(os.path.dirname(path), at.group(1))))
-        if there != here:
+        foreign = there != here
+        if foreign:
             message = f"{at.group(1)}:{line + 1}:{col + 1}: {message}"
             line, col = 0, 0
         source_line = lines[line].rstrip('\r') if 0 <= line < len(lines) else ""
-        if col == 0:
+        if foreign:
+            end = 1
+        elif col == 0:
             # Type errors point at column 1; underline the statement instead.
             col = len(source_line) - len(source_line.lstrip())
             end = len(source_line.rstrip())
@@ -1105,7 +1131,8 @@ def _run_compiler_check(uri: str, path: str, generation: int):
     output = (result.stdout + b"\n" + result.stderr).decode("utf-8", errors="replace")
     found = parse_compiler_output(output, path, saved)
     with _check_lock:
-        if _check_generation.get(uri) != generation or uri not in documents:
+        if (_check_generation.get(uri) != generation or uri not in documents
+                or documents[uri].replace('\r\n', '\n') != saved):
             return
         compiler_diagnostics[uri] = found
     _publish_diagnostics(uri, documents[uri])

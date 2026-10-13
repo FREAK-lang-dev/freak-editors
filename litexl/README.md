@@ -27,7 +27,7 @@ python -m pip install -r ~/.config/lite-xl/plugins/language_freak/requirements.t
 ```
 
 With `freak` 0.15.0 or later on your `PATH`, opening or saving a file also
-reports the compiler's own `freak check` errors.
+reports the compiler's own `freak check` errors; they clear when you edit.
 
 Override the defaults in your user `init.lua` before the plugin loads:
 

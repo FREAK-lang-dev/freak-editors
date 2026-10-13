@@ -16,6 +16,7 @@ SOURCE = """task greet(name: word) -> void {
 }
 wh
 greet("Takeru")
+say gr
 """
 
 # What `freak check` 0.15.0 prints for SOURCE's reassignment, colours included.
@@ -117,6 +118,11 @@ def verify(vsix: Path) -> None:
                 labels = [item["label"] for item in response(2)["items"]]
                 assert "while" in labels and "when" in labels, labels
                 assert "pilot" not in labels, labels
+                # An earlier token on the line must not narrow the filter.
+                send({"id": 5, "method": "textDocument/completion", "params": {
+                    "textDocument": {"uri": uri}, "position": {"line": 6, "character": 6}}})
+                labels = [item["label"] for item in response(5)["items"]]
+                assert "greet" in labels and "grounded pilot" in labels, labels
                 send({"id": 3, "method": "textDocument/definition", "params": {
                     "textDocument": {"uri": uri}, "position": {"line": 5, "character": 2}}})
                 assert response(3)["range"]["start"] == {"line": 0, "character": 5}
@@ -124,6 +130,16 @@ def verify(vsix: Path) -> None:
                 assert diagnostic["message"] == "fixed pilot cannot be modified", diagnostic
                 assert diagnostic["range"] == {"start": {"line": 2, "character": 4},
                                                "end": {"line": 2, "character": 9}}, diagnostic
+                # Editing invalidates what the compiler said about the saved text.
+                send({"method": "textDocument/didChange", "params": {
+                    "textDocument": {"uri": uri, "version": 2}, "contentChanges": [{
+                        "range": {"start": {"line": 6, "character": 6},
+                                  "end": {"line": 6, "character": 6}}, "text": "e"}]}})
+                for _ in range(20):
+                    message = messages.get(timeout=15)
+                    if message.get("method") == "textDocument/publishDiagnostics":
+                        break
+                assert all(d["source"] != "freak" for d in message["params"]["diagnostics"]), message
                 send({"id": 4, "method": "shutdown", "params": None})
                 response(4)
                 send({"method": "exit", "params": None})

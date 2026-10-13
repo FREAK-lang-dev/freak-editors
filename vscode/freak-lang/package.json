@@ -187,8 +187,8 @@
         "owner": "freak",
         "source": "freak",
         "fileLocation": [
-          "relative",
-          "${cwd}"
+          "autoDetect",
+          "${workspaceFolder}"
         ],
         "pattern": [
           {

@@ -19,7 +19,8 @@ installation may use that asset; no marketplace publications are added here.
 The Python LSP provides lightweight text-based completion, hover, go to
 definition within a file, and basic diagnostics. When a `freak` 0.15.0 or later
 compiler is installed it also runs `freak check` on open and save and reports
-the compiler's errors; without one those diagnostics are simply absent. It adds
+the compiler's errors until the next edit; without one those diagnostics are
+simply absent. It adds
 no type or borrow analysis of its own. Zed currently ships snippets and grammar
 support only. Grammar coverage does not
 imply that every highlighted form is implemented in the shipping compiler.
@@ -47,7 +48,7 @@ copies under `vscode/freak-lang` remain for direct extension development.
 ## Release ownership
 
 `VERSION` controls standalone editor releases. Push a matching `v<version>` tag
-to build, test, checksum, and publish both downloads in this repository. No tag or
+to build, test, checksum, and publish all three downloads in this repository. No tag or
 release is created by building locally.
 
 FREAK language releases call `.github/workflows/editor-packages.yml` at a pinned

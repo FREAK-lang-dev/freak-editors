@@ -76,7 +76,9 @@ async function runOnFile(verb, uri) {
     }
     if (document.isDirty && !(await document.save())) return;
     const file = document.uri.fsPath;
-    await runCompiler(`${verb} ${path.basename(file)}`, [verb, path.basename(file)],
+    // The compiler echoes the path it was given; an absolute one lets the
+    // problem matcher locate the file whatever the task's directory.
+    await runCompiler(`${verb} ${path.basename(file)}`, [verb, file],
         path.dirname(file), vscode.workspace.getWorkspaceFolder(document.uri));
 }
 
@@ -203,9 +205,17 @@ async function stopServer() {
     }
 }
 
-async function restartServer(context) {
-    await stopServer();
-    await startServer(context);
+let restarting = Promise.resolve();
+
+// Configuration events can arrive in bursts; overlapping restarts would
+// leave more than one client running.
+function restartServer(context) {
+    const run = async () => {
+        await stopServer();
+        await startServer(context);
+    };
+    restarting = restarting.then(run, run);
+    return restarting;
 }
 
 function findPython() {

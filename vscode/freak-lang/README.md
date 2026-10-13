@@ -28,7 +28,7 @@ With `freak` 0.15.0 or later on your `PATH` (or `freak.compilerPath` set):
 
 - **Compiler diagnostics.** Opening or saving a `.fk` file runs `freak check` on
   it and shows the shipping compiler's syntax and type errors in the editor.
-  They refresh on save, not while typing. Turn this off with
+  They refresh on save and clear when you edit. Turn this off with
   `freak.diagnostics.compiler`.
 - **Run, Check and Build** buttons in the editor title bar, and **FREAK: Test
   Project** in the Command Palette. Each runs as a task, so compiler errors also
