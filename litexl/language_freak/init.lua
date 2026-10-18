@@ -14,6 +14,9 @@ config.plugins.language_freak = common.merge({
   -- Compiler used for `freak check` diagnostics on open and save.
   compiler = "freak",
   compiler_diagnostics = true,
+  -- Command that starts a different FREAK language server over stdio, such as
+  -- { "freak-lsp" }. When set it replaces the bundled Python server.
+  server_command = nil,
 }, config.plugins.language_freak)
 
 local symbols = {}
@@ -96,16 +99,21 @@ core.add_thread(function()
   if not options.lsp or type(lsp) ~= "table" or not lsp.add_server then
     return
   end
-  local server = find_server()
-  if not server then
-    core.warn("FREAK: freak_lsp.py not found in plugins/language_freak")
-    return
+  local command = options.server_command
+  if type(command) == "string" then command = { command } end
+  if type(command) ~= "table" or #command == 0 then
+    local server = find_server()
+    if not server then
+      core.warn("FREAK: freak_lsp.py not found in plugins/language_freak")
+      return
+    end
+    command = { options.python, server, "--stdio" }
   end
   lsp.add_server {
     name = "freak-lsp",
     language = "freak",
     file_patterns = { "%.fk$" },
-    command = { options.python, server, "--stdio" },
+    command = command,
     init_options = {
       compilerPath = options.compiler,
       compilerDiagnostics = options.compiler_diagnostics,

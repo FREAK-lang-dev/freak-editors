@@ -1,7 +1,7 @@
 {
   "name": "freak-lang",
   "displayName": "FREAK Language Support",
-  "description": "Syntax highlighting, snippets, compiler commands, and language server support for the FREAK programming language (.fk files)",
+  "description": "Syntax highlighting, snippets, compiler and Hangar commands, and language server support for the FREAK programming language (.fk files)",
   "version": "0.1.0",
   "publisher": "freak-lang-dev",
   "license": "MIT",
@@ -74,6 +74,40 @@
           "default": true,
           "description": "Report `freak check` errors in the editor when a file is opened or saved"
         },
+        "freak.build.optimization": {
+          "type": "string",
+          "enum": [
+            "default",
+            "O0",
+            "O1",
+            "O2",
+            "O3"
+          ],
+          "default": "default",
+          "markdownDescription": "Optimization level passed to **Run File** and **Build File** (`--O0`..`--O3`, FREAK 0.15.1+). `default` passes nothing, which builds at `--O2`."
+        },
+        "freak.build.lto": {
+          "type": "string",
+          "enum": [
+            "default",
+            "off",
+            "thin",
+            "full"
+          ],
+          "default": "default",
+          "markdownDescription": "Link-time optimization for **Run File** and **Build File**: `thin` passes `--tlto`, `full` passes `--flto` (FREAK 0.15.1+). `default` passes nothing."
+        },
+        "freak.diagnosticCast": {
+          "type": "string",
+          "enum": [
+            "default",
+            "off",
+            "minimal",
+            "normal"
+          ],
+          "default": "default",
+          "markdownDescription": "Diagnostic cast for **Run**, **Build** and **Check** (`--diagnostic-cast=...`, FREAK 0.15.1+). When on, the cast comments on your errors after the normal diagnostic. `default` passes nothing (the compiler's default is `off`)."
+        },
         "freak.lsp.enabled": {
           "type": "boolean",
           "default": true,
@@ -88,6 +122,14 @@
           "type": "string",
           "default": "",
           "description": "Path to freak_lsp.py (auto-detected if empty)"
+        },
+        "freak.lsp.command": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "Command that starts a different FREAK language server over stdio, for example `[\"freak-lsp\"]`. When set, it replaces the bundled Python server and `freak.lsp.pythonPath` and `freak.lsp.serverPath` are ignored."
         }
       }
     },
@@ -115,6 +157,66 @@
         "title": "Test Project",
         "category": "FREAK",
         "icon": "$(beaker)"
+      },
+      {
+        "command": "freak.hangarInstall",
+        "title": "Install Dependencies",
+        "category": "Hangar",
+        "icon": "$(package)"
+      },
+      {
+        "command": "freak.hangarUpdate",
+        "title": "Update Dependencies",
+        "category": "Hangar",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "freak.hangarAdd",
+        "title": "Add Dependency...",
+        "category": "Hangar",
+        "icon": "$(add)"
+      },
+      {
+        "command": "freak.hangarOutdated",
+        "title": "Show Outdated Dependencies",
+        "category": "Hangar",
+        "icon": "$(versions)"
+      },
+      {
+        "command": "freak.hangarAudit",
+        "title": "Audit Dependencies",
+        "category": "Hangar",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "freak.hangarLogin",
+        "title": "Log In to the Registry",
+        "category": "Hangar",
+        "icon": "$(sign-in)"
+      },
+      {
+        "command": "freak.hangarStatus",
+        "title": "Show Registry Account",
+        "category": "Hangar",
+        "icon": "$(account)"
+      },
+      {
+        "command": "freak.hangarLogout",
+        "title": "Log Out of the Registry",
+        "category": "Hangar",
+        "icon": "$(sign-out)"
+      },
+      {
+        "command": "freak.hangarPublishDryRun",
+        "title": "Publish Package (Dry Run)",
+        "category": "Hangar",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "freak.hangarPublish",
+        "title": "Publish Package...",
+        "category": "Hangar",
+        "icon": "$(cloud-upload)"
       },
       {
         "command": "freak.restartServer",
@@ -176,7 +278,7 @@
         "properties": {
           "command": {
             "type": "string",
-            "description": "The freak subcommand: run, build, check, or test"
+            "description": "The freak subcommand: run, build, check, test, or hangar"
           }
         }
       }
