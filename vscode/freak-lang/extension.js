@@ -171,7 +171,12 @@ async function runHangar(args) {
     }
     const cwd = project ? project.dir
         : ((vscode.workspace.workspaceFolders || [])[0] || { uri: { fsPath: process.cwd() } }).uri.fsPath;
-    await vscode.workspace.saveAll(false);
+    // Hangar reads the manifest and sources from disk; never run (above all
+    // publish) against files that failed to save.
+    if (!(await vscode.workspace.saveAll(false))) {
+        vscode.window.showErrorMessage('FREAK: some files could not be saved, so Hangar was not run.');
+        return;
+    }
     await runCompiler(`hangar ${args.join(' ')}`, ['hangar', ...args], cwd, project && project.folder);
 }
 

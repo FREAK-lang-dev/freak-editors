@@ -45,11 +45,12 @@ jobs:
               *) exit "$status" ;;
             esac
           fi
-          # Never rebuild over a published release's assets. Only an explicit
-          # "not found" allows publishing; any other lookup failure stops here.
-          if lookup=$(gh release view "v$version" --repo "$GITHUB_REPOSITORY" --json tagName 2>&1); then
+          # Never rebuild over a published release's assets. Only an HTTP 404
+          # from the published-release lookup allows publishing; any other
+          # failure stops here.
+          if lookup=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/v$version" --jq .id 2>&1); then
             release=false
-          elif [[ "$lookup" != *"release not found"* ]]; then
+          elif [[ "$lookup" != *"HTTP 404"* ]]; then
             echo "Could not look up release v$version: $lookup" >&2
             exit 1
           fi
