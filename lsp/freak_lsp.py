@@ -14,7 +14,7 @@ import re
 import shutil
 import subprocess
 import threading
-from urllib.parse import unquote, urlparse
+from urllib.parse import urlparse
 from urllib.request import url2pathname
 import sys
 import logging
@@ -270,7 +270,7 @@ RE_SHAPE = re.compile(r'\bshape\s+([A-Z]\w*)')
 RE_DOCTRINE = re.compile(r'\bdoctrine\s+([A-Z]\w*)')
 RE_IMPL = re.compile(r'\bimpl\s+([A-Z]\w*)')
 RE_ROUTE = re.compile(r'\broute\s+([A-Z]\w*)')
-RE_PILOT = re.compile(r'\bpilot\s+([a-zA-Z_]\w*)\s*(?::\s*(\S+))?\s*=')
+RE_PILOT = re.compile(r'\bpilot\s+(?:mut\s+)?([a-zA-Z_]\w*)\s*(?::\s*(\S+))?\s*=')
 RE_FIXED = re.compile(r'\b(?:fixed|grounded)\s+pilot\s+([a-zA-Z_]\w*)\s*(?::\s*(\S+))?\s*=')
 RE_FIELD = re.compile(r'^\s+([a-zA-Z_]\w*)\s*:\s*(\S+)')
 RE_USE = re.compile(r'\buse\s+([\w:]+)')
@@ -358,7 +358,7 @@ def scan_document(text: str) -> DocumentSymbols:
 #  Language Server
 # ============================================================
 
-server = LanguageServer("freak-lsp", "v0.15.0")
+server = LanguageServer("freak-lsp", "v0.15.1")
 documents: dict[str, str] = {}
 doc_symbols: dict[str, DocumentSymbols] = {}
 
@@ -1027,6 +1027,8 @@ compiler = {
 }
 compiler_diagnostics: dict[str, list] = {}
 _check_generation: dict[str, int] = {}
+# The `freak check` still running for each document, so a newer save can stop it.
+_check_process: dict[str, subprocess.Popen] = {}
 _check_lock = threading.Lock()
 
 RE_ANSI = re.compile(r'\x1b\[[0-9;]*m')
@@ -1040,7 +1042,9 @@ def _uri_to_path(uri: str) -> Optional[str]:
     parsed = urlparse(uri)
     if parsed.scheme != "file":
         return None
-    path = url2pathname(unquote(parsed.path))
+    # url2pathname percent-decodes on every platform; decoding first would
+    # turn foo%2520bar.fk into foo bar.fk.
+    path = url2pathname(parsed.path)
     if parsed.netloc and parsed.netloc != "localhost":
         path = f"//{parsed.netloc}{path}"
     return path
@@ -1104,8 +1108,27 @@ def _schedule_compiler_check(uri: str):
     with _check_lock:
         generation = _check_generation.get(uri, 0) + 1
         _check_generation[uri] = generation
+        # Its result would be discarded anyway; don't let rapid saves pile up
+        # compiler processes.
+        superseded = _check_process.pop(uri, None)
+    if superseded is not None:
+        _stop(superseded)
     threading.Thread(target=_run_compiler_check, args=(uri, path, generation),
                      daemon=True).start()
+
+
+def _lf(text: str) -> str:
+    """Compare editor and disk text the same way whatever their line endings."""
+    return text.replace('\r\n', '\n').replace('\r', '\n')
+
+
+def _stop(process: subprocess.Popen):
+    """Kill a check; the thread that started it still collects its output."""
+    if process.poll() is None:
+        try:
+            process.kill()
+        except OSError:
+            pass
 
 
 def _run_compiler_check(uri: str, path: str, generation: int):
@@ -1116,23 +1139,38 @@ def _run_compiler_check(uri: str, path: str, generation: int):
             f"FREAK compiler '{compiler['path']}' not found; compiler diagnostics are off")
         return
     try:
-        with open(path, encoding="utf-8", errors="replace") as handle:
-            saved = handle.read()
-        result = subprocess.run(
-            [executable, "check", os.path.basename(path)],
-            cwd=os.path.dirname(path) or ".", capture_output=True, timeout=30,
-            stdin=subprocess.DEVNULL,
-            env={**os.environ, "NO_COLOR": "1"},
-            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-        )
-    except (OSError, subprocess.TimeoutExpired) as error:
+        with open(path, encoding="utf-8", errors="replace", newline="") as handle:
+            saved = _lf(handle.read())
+        with _check_lock:
+            if _check_generation.get(uri) != generation:
+                return
+            process = subprocess.Popen(
+                [executable, "check", os.path.basename(path)],
+                cwd=os.path.dirname(path) or ".",
+                stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                env={**os.environ, "NO_COLOR": "1"},
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            _check_process[uri] = process
+        try:
+            stdout, stderr = process.communicate(timeout=30)
+        finally:
+            with _check_lock:
+                if _check_process.get(uri) is process:
+                    del _check_process[uri]
+    except subprocess.TimeoutExpired as error:
+        _stop(process)
+        process.communicate()
         server.show_message_log(f"freak check failed: {error}")
         return
-    output = (result.stdout + b"\n" + result.stderr).decode("utf-8", errors="replace")
+    except OSError as error:
+        server.show_message_log(f"freak check failed: {error}")
+        return
+    output = (stdout + b"\n" + stderr).decode("utf-8", errors="replace")
     found = parse_compiler_output(output, path, saved)
     with _check_lock:
         if (_check_generation.get(uri) != generation or uri not in documents
-                or documents[uri].replace('\r\n', '\n') != saved):
+                or _lf(documents[uri]) != saved):
             return
         compiler_diagnostics[uri] = found
     _publish_diagnostics(uri, documents[uri])

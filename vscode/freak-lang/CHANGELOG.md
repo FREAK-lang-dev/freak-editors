@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.15.1] - 2026-10-18
+
+### Added
+- Hangar commands for FREAK 0.15.1: install, update, add, outdated, audit,
+  registry log in / account / log out, and publish (dry run, or confirmed)
+- `freak.build.optimization` and `freak.build.lto` settings for the new
+  `--O0`..`--O3`, `--tlto` and `--flto` flags on Run and Build
+- `freak.diagnosticCast` setting for `--diagnostic-cast` on Run, Build and Check
+- `freak.lsp.command` to launch a different stdio language server in place of
+  the bundled Python one
+
+### Fixed
+- `pilot mut x = ...` bindings now show up in completion and go to definition
+- Files whose names contain `%` escapes are checked as the right file
+- Compiler diagnostics appear for files with CRLF line endings
+- Rapid saves stop the superseded `freak check` instead of stacking processes
+
 ## [0.15.0] - 2026-10-13
 
 ### Added

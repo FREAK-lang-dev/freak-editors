@@ -17,9 +17,11 @@ SOURCE = """task greet(name: word) -> void {
 wh
 greet("Takeru")
 say gr
+pilot mut count = 0
+count = 1
 """
 
-# What `freak check` 0.15.0 prints for SOURCE's reassignment, colours included.
+# What `freak check` 0.15.x prints for SOURCE's reassignment, colours included.
 COMPILER_OUTPUT = """Source length: 86
   \x1b[1;32mOK\x1b[0m  Parsing\x1b[2m (13ms)\x1b[0m
 \x1b[1;31mtype error\x1b[0m: fixed pilot cannot be modified (line 3)
@@ -108,11 +110,16 @@ def verify(vsix: Path) -> None:
                 assert "completionProvider" in capabilities
                 assert capabilities["textDocumentSync"]["save"], capabilities
                 send({"method": "initialized", "params": {}})
-                sample = Path(temporary) / "sample.fk"
-                sample.write_text(SOURCE, encoding="utf-8")
+                # A percent sign in the path must survive URI decoding, and CRLF
+                # files must still match the text the compiler checked.
+                folder = Path(temporary) / "dir%20x"
+                folder.mkdir()
+                sample = folder / "sample.fk"
+                text = SOURCE.replace("\n", "\r\n")
+                sample.write_bytes(text.encode())
                 uri = sample.as_uri()
                 send({"method": "textDocument/didOpen", "params": {"textDocument": {
-                    "uri": uri, "languageId": "freak", "version": 1, "text": SOURCE}}})
+                    "uri": uri, "languageId": "freak", "version": 1, "text": text}}})
                 send({"id": 2, "method": "textDocument/completion", "params": {
                     "textDocument": {"uri": uri}, "position": {"line": 4, "character": 2}}})
                 labels = [item["label"] for item in response(2)["items"]]
@@ -126,6 +133,9 @@ def verify(vsix: Path) -> None:
                 send({"id": 3, "method": "textDocument/definition", "params": {
                     "textDocument": {"uri": uri}, "position": {"line": 5, "character": 2}}})
                 assert response(3)["range"]["start"] == {"line": 0, "character": 5}
+                send({"id": 6, "method": "textDocument/definition", "params": {
+                    "textDocument": {"uri": uri}, "position": {"line": 8, "character": 1}}})
+                assert response(6)["range"]["start"] == {"line": 7, "character": 10}
                 diagnostic = compiler_diagnostic()
                 assert diagnostic["message"] == "fixed pilot cannot be modified", diagnostic
                 assert diagnostic["range"] == {"start": {"line": 2, "character": 4},

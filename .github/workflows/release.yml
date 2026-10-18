@@ -45,9 +45,14 @@ jobs:
               *) exit "$status" ;;
             esac
           fi
-          # Never rebuild over a published release's assets.
-          if gh release view "v$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          # Never rebuild over a published release's assets. Only an HTTP 404
+          # from the published-release lookup allows publishing; any other
+          # failure stops here.
+          if lookup=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/v$version" --jq .id 2>&1); then
             release=false
+          elif [[ "$lookup" != *"HTTP 404"* ]]; then
+            echo "Could not look up release v$version: $lookup" >&2
+            exit 1
           fi
           if [[ "$release" == false ]]; then
             echo "v$version is already released; nothing to publish."
@@ -71,6 +76,24 @@ jobs:
           name: editor-packages
           path: dist/
       - run: cd dist && sha256sum --check SHA256SUMS
+      # A tag pushed by hand while this run was building would make the release
+      # below attach these assets to that tag's commit instead. Refuse unless
+      # the tag is still absent or names the commit that was built.
+      - name: Verify the release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ needs.version.outputs.version }}
+          BUILT: ${{ github.sha }}
+        run: |
+          if tagged=$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha 2>&1); then
+            if [[ "$tagged" != "$BUILT" ]]; then
+              echo "$TAG points at $tagged, not the built commit $BUILT" >&2
+              exit 1
+            fi
+          elif [[ "$tagged" != *"HTTP 404"* && "$tagged" != *"HTTP 422"* ]]; then
+            echo "Could not resolve $TAG: $tagged" >&2
+            exit 1
+          fi
       - uses: softprops/action-gh-release@v2
         with:
           # On a main push this creates the tag at the released commit.

@@ -33,8 +33,35 @@ With `freak` 0.15.0 or later on your `PATH` (or `freak.compilerPath` set):
 - **Run, Check and Build** buttons in the editor title bar, and **FREAK: Test
   Project** in the Command Palette. Each runs as a task, so compiler errors also
   land in the Problems panel.
+- **Build settings.** `freak.build.optimization` (`O0`..`O3`) and
+  `freak.build.lto` (`thin`, `full`, `off`) add `--O3`, `--tlto`, `--flto` and
+  friends to Run and Build. `freak.diagnosticCast` (`off`, `minimal`, `normal`)
+  adds `--diagnostic-cast` to Run, Build and Check. Left at `default`, nothing
+  is passed. These flags need FREAK 0.15.1 or later.
 - A status bar item shows the installed compiler version and opens the command
   list. **FREAK: Restart Language Server** reloads the server.
+
+## Hangar
+
+The **Hangar** commands in the Command Palette run `freak hangar ...` in the
+project that owns the active file (the nearest `hangar.toml`):
+
+- **Install Dependencies**, **Update Dependencies**, **Add Dependency...**
+  (a name plus an optional `^0.1.0`-style constraint or Git URL),
+  **Show Outdated Dependencies** and **Audit Dependencies**
+- **Log In to the Registry**, **Show Registry Account** and **Log Out of the
+  Registry** for the device login at hangar.freaklang.dev
+- **Publish Package (Dry Run)** and **Publish Package...**, which asks before
+  uploading because a published version can't be replaced
+
+Registry and auth commands need FREAK 0.15.1 or later.
+
+## Another language server
+
+Set `freak.lsp.command` to start a different FREAK language server over stdio,
+for example `["freak-lsp"]`. It replaces the bundled Python server, so Python is
+not needed. The compiler path and `freak.diagnostics.compiler` are still sent as
+initialization options (`compilerPath`, `compilerDiagnostics`).
 
 ## Features
 

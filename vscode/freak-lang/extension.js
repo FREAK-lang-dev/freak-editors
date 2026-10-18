@@ -13,8 +13,38 @@ const COMMANDS = [
     { id: 'freak.buildFile', label: '$(tools) Build File', verb: 'build' },
     { id: 'freak.checkFile', label: '$(check) Check File', verb: 'check' },
     { id: 'freak.testProject', label: '$(beaker) Test Project' },
+    { id: 'freak.hangarInstall', label: '$(package) Hangar: Install Dependencies', hangar: ['install'] },
+    { id: 'freak.hangarUpdate', label: '$(sync) Hangar: Update Dependencies', hangar: ['update'] },
+    { id: 'freak.hangarAdd', label: '$(add) Hangar: Add Dependency', hangar: ['add'] },
+    { id: 'freak.hangarOutdated', label: '$(versions) Hangar: Show Outdated', hangar: ['outdated'] },
+    { id: 'freak.hangarAudit', label: '$(shield) Hangar: Audit', hangar: ['audit'] },
+    { id: 'freak.hangarLogin', label: '$(sign-in) Hangar: Log In', hangar: ['auth', 'login'] },
+    { id: 'freak.hangarStatus', label: '$(account) Hangar: Account Status', hangar: ['auth', 'status'] },
+    { id: 'freak.hangarLogout', label: '$(sign-out) Hangar: Log Out', hangar: ['auth', 'logout'] },
+    { id: 'freak.hangarPublishDryRun', label: '$(eye) Hangar: Publish (Dry Run)', hangar: ['publish', '--dry-run'] },
+    { id: 'freak.hangarPublish', label: '$(cloud-upload) Hangar: Publish', hangar: ['publish'] },
     { id: 'freak.restartServer', label: '$(refresh) Restart Language Server' },
 ];
+
+// Build profile flags only apply to build and run; the diagnostic cast also
+// applies to check. Settings left at "default" pass nothing, so older
+// compilers keep working.
+const OPT_FLAGS = { O0: '--O0', O1: '--O1', O2: '--O2', O3: '--O3' };
+const LTO_FLAGS = { off: '--lto=off', thin: '--tlto', full: '--flto' };
+
+function compilerFlags(verb) {
+    const config = vscode.workspace.getConfiguration('freak');
+    const flags = [];
+    if (verb === 'build' || verb === 'run') {
+        const opt = OPT_FLAGS[config.get('build.optimization', 'default')];
+        const lto = LTO_FLAGS[config.get('build.lto', 'default')];
+        if (opt) flags.push(opt);
+        if (lto) flags.push(lto);
+    }
+    const cast = config.get('diagnosticCast', 'default');
+    if (['off', 'minimal', 'normal'].includes(cast)) flags.push(`--diagnostic-cast=${cast}`);
+    return flags;
+}
 
 async function activate(context) {
     outputChannel = vscode.window.createOutputChannel('FREAK');
@@ -25,6 +55,8 @@ async function activate(context) {
     }
     context.subscriptions.push(
         vscode.commands.registerCommand('freak.testProject', testProject),
+        ...COMMANDS.filter(command => command.hangar)
+            .map(({ id, hangar }) => vscode.commands.registerCommand(id, () => runHangar(hangar))),
         vscode.commands.registerCommand('freak.restartServer', () => restartServer(context)),
         vscode.commands.registerCommand('freak.showCommands', showCommands),
         vscode.window.onDidChangeActiveTextEditor(updateStatus),
@@ -78,8 +110,74 @@ async function runOnFile(verb, uri) {
     const file = document.uri.fsPath;
     // The compiler echoes the path it was given; an absolute one lets the
     // problem matcher locate the file whatever the task's directory.
-    await runCompiler(`${verb} ${path.basename(file)}`, [verb, file],
+    await runCompiler(`${verb} ${path.basename(file)}`, [verb, file, ...compilerFlags(verb)],
         path.dirname(file), vscode.workspace.getWorkspaceFolder(document.uri));
+}
+
+// ---- Hangar ----
+
+// The nearest hangar.toml above the active file, else in the first workspace
+// folder that has one.
+function hangarProject() {
+    const editor = vscode.window.activeTextEditor;
+    const folders = vscode.workspace.workspaceFolders || [];
+    if (editor && editor.document.uri.scheme === 'file') {
+        const folder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+        const stop = folder ? folder.uri.fsPath : path.parse(editor.document.uri.fsPath).root;
+        let dir = path.dirname(editor.document.uri.fsPath);
+        for (;;) {
+            if (fs.existsSync(path.join(dir, 'hangar.toml'))) return { dir, folder };
+            const parent = path.dirname(dir);
+            if (dir === stop || parent === dir) break;
+            dir = parent;
+        }
+    }
+    for (const folder of folders) {
+        if (fs.existsSync(path.join(folder.uri.fsPath, 'hangar.toml'))) {
+            return { dir: folder.uri.fsPath, folder };
+        }
+    }
+    return null;
+}
+
+async function runHangar(args) {
+    const needsProject = args[0] !== 'auth';
+    const project = needsProject ? hangarProject() : null;
+    if (needsProject && !project) {
+        vscode.window.showWarningMessage('FREAK: no hangar.toml found. Run `hangar init` in your project first.');
+        return;
+    }
+    args = [...args];
+    if (args[0] === 'add') {
+        const name = await vscode.window.showInputBox({
+            prompt: 'Package to add',
+            placeHolder: 'cockpit',
+            validateInput: value => /^[A-Za-z0-9_-]+$/.test(value.trim()) ? null : 'Use letters, digits, - or _',
+        });
+        if (!name) return;
+        const source = await vscode.window.showInputBox({
+            prompt: 'Version constraint or Git URL (leave empty for the newest version)',
+            placeHolder: '^0.1.0',
+        });
+        if (source === undefined) return;
+        args.push(name.trim());
+        if (source.trim()) args.push(source.trim());
+    }
+    if (args[0] === 'publish' && !args.includes('--dry-run')) {
+        const choice = await vscode.window.showWarningMessage(
+            `Publish ${path.basename(project.dir)} to the Hangar registry? A published version can't be replaced.`,
+            { modal: true }, 'Publish');
+        if (choice !== 'Publish') return;
+    }
+    const cwd = project ? project.dir
+        : ((vscode.workspace.workspaceFolders || [])[0] || { uri: { fsPath: process.cwd() } }).uri.fsPath;
+    // Hangar reads the manifest and sources from disk; never run (above all
+    // publish) against files that failed to save.
+    if (!(await vscode.workspace.saveAll(false))) {
+        vscode.window.showErrorMessage('FREAK: some files could not be saved, so Hangar was not run.');
+        return;
+    }
+    await runCompiler(`hangar ${args.join(' ')}`, ['hangar', ...args], cwd, project && project.folder);
 }
 
 async function testProject() {
@@ -128,6 +226,14 @@ async function startServer(context) {
         return;
     }
 
+    // A user-supplied server (for example a native FREAK language server)
+    // replaces the bundled Python one. It must speak LSP over stdio.
+    const command = (config.get('lsp.command', []) || []).filter(part => typeof part === 'string' && part);
+    if (command.length) {
+        outputChannel.appendLine(`Server: ${command.join(' ')}`);
+        return launchClient({ command: command[0], args: command.slice(1), transport: TransportKind.stdio }, config);
+    }
+
     // Find python
     const pythonPath = config.get('lsp.pythonPath', '') || findPython();
     if (!pythonPath) {
@@ -166,12 +272,14 @@ async function startServer(context) {
     }
 
     // Start LSP
-    const serverOptions = {
+    return launchClient({
         command: pythonPath,
         args: [serverPath, '--stdio'],
         transport: TransportKind.stdio,
-    };
+    }, config);
+}
 
+async function launchClient(serverOptions, config) {
     const clientOptions = {
         documentSelector: [{ scheme: 'file', language: 'freak' }],
         outputChannel: outputChannel,

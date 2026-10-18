@@ -14,7 +14,7 @@ is installed. Requires Lite XL 2.1 or later.
    - Windows: `%USERPROFILE%\.config\lite-xl\plugins\`
 3. Restart Lite XL.
 
-Highlighting works immediately and covers FREAK 0.15.0 syntax, including
+Highlighting works immediately and covers FREAK 0.15 syntax, including
 `while`, `repeat while`, ranges with `step`, and `grounded pilot`.
 
 ## Language server
@@ -38,6 +38,8 @@ config.plugins.language_freak = {
   compiler = "/path/to/freak",
   compiler_diagnostics = true,
   lsp = true,
+  -- Optional: start another stdio language server instead of the bundled one.
+  -- server_command = { "freak-lsp" },
 }
 ```
 
