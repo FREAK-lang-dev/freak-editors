@@ -242,7 +242,10 @@ async function startServer(context) {
         const native = findNativeServer();
         if (native) {
             outputChannel.appendLine(`Server: ${native}`);
-            return launchClient({ command: native, args: [], transport: TransportKind.stdio }, config);
+            // In `auto`, a native server that will not start falls back to Python.
+            const started = await launchClient({ command: native, args: [], transport: TransportKind.stdio }, config, choice === 'auto');
+            if (started || choice === 'freak-lsp') return;
+            outputChannel.appendLine('freak-lsp did not start; trying the bundled Python server');
         }
         if (choice === 'freak-lsp') {
             vscode.window.showWarningMessage('FREAK: freak-lsp was not found on PATH or next to the compiler; using the bundled Python server.');
@@ -294,7 +297,9 @@ async function startServer(context) {
     }, config);
 }
 
-async function launchClient(serverOptions, config) {
+// Resolves true once the client is running. With `quiet`, a failure is only
+// logged so the caller can try another server.
+async function launchClient(serverOptions, config, quiet = false) {
     const clientOptions = {
         documentSelector: [{ scheme: 'file', language: 'freak' }],
         outputChannel: outputChannel,
@@ -310,10 +315,16 @@ async function launchClient(serverOptions, config) {
     try {
         await client.start();
         outputChannel.appendLine('FREAK LSP started');
+        return true;
     } catch (err) {
+        const failed = client;
         client = null;
+        if (failed) {
+            try { await failed.stop(); } catch (e) {}
+        }
         outputChannel.appendLine(`Failed to start LSP: ${err.message}`);
-        vscode.window.showErrorMessage(`FREAK LSP failed: ${err.message}`);
+        if (!quiet) vscode.window.showErrorMessage(`FREAK LSP failed: ${err.message}`);
+        return false;
     }
 }
 
@@ -352,7 +363,10 @@ function findNativeServer() {
         for (const name of names) {
             const candidate = path.join(dir, name);
             try {
-                if (fs.statSync(candidate).isFile()) return candidate;
+                if (!fs.statSync(candidate).isFile()) continue;
+                // Windows has no execute bit; elsewhere skip files we cannot run.
+                if (process.platform !== 'win32') fs.accessSync(candidate, fs.constants.X_OK);
+                return candidate;
             } catch (e) {}
         }
     }

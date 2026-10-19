@@ -25,7 +25,13 @@ impl zed::Extension for FreakExtension {
             .ok()
             .and_then(|settings| settings.binary);
         let configured = binary.as_ref().and_then(|binary| binary.path.clone());
-        let args = binary.and_then(|binary| binary.arguments).unwrap_or_default();
+        let args = binary.as_ref().and_then(|binary| binary.arguments.clone()).unwrap_or_default();
+        // Configured variables win over the worktree's shell environment.
+        let mut env = worktree.shell_env();
+        if let Some(extra) = binary.and_then(|binary| binary.env) {
+            env.retain(|(key, _)| !extra.contains_key(key));
+            env.extend(extra);
+        }
         let command = configured
             .or_else(|| worktree.which("freak-lsp"))
             .ok_or_else(|| {
@@ -34,7 +40,7 @@ impl zed::Extension for FreakExtension {
                  lsp.freak-lsp.binary.path in Zed's settings."
                     .to_string()
             })?;
-        Ok(zed::Command { command, args, env: worktree.shell_env() })
+        Ok(zed::Command { command, args, env })
     }
 
     fn language_server_initialization_options(
