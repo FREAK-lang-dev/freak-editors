@@ -74,6 +74,11 @@
           "default": true,
           "description": "Report `freak check` errors in the editor when a file is opened or saved"
         },
+        "freak.diagnostics.maverick": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "With the native `freak-lsp` server, also report live diagnostics from the Maverick (V4) compiler on every edit. Maverick is strict V4, so it flags V3-only code such as root statements."
+        },
         "freak.build.optimization": {
           "type": "string",
           "enum": [
@@ -122,6 +127,17 @@
           "type": "string",
           "default": "",
           "description": "Path to freak_lsp.py (auto-detected if empty)"
+        },
+        "freak.lsp.server": {
+          "type": "string",
+          "enum": ["auto", "freak-lsp", "python"],
+          "enumDescriptions": [
+            "Use the native freak-lsp server when it is on PATH or next to the compiler, else the bundled Python server",
+            "Use the native freak-lsp server (falls back to Python with a warning when it is missing)",
+            "Always use the bundled Python server"
+          ],
+          "default": "auto",
+          "description": "Which FREAK language server to start"
         },
         "freak.lsp.command": {
           "type": "array",

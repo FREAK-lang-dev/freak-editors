@@ -58,6 +58,9 @@ def verify(artifacts: Path, version: str) -> None:
         for name in ("highlights", "outline", "brackets", "indents"):
             assert archive.read(f"freak-zed/languages/freak/{name}.scm")
         assert archive.read("freak-zed/LICENSE")
+        assert manifest["language_servers"]["freak-lsp"]["languages"] == ["FREAK"]
+        assert b"zed_extension_api" in archive.read("freak-zed/Cargo.toml")
+        assert b'worktree.which("freak-lsp")' in archive.read("freak-zed/src/lib.rs")
 
     with zipfile.ZipFile(artifacts / f"freak-litexl-{version}.zip") as archive:
         names = set(archive.namelist())

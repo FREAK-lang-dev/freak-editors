@@ -10,3 +10,7 @@ snippets = ["snippets/freak.json"]
 [grammars.freak]
 repository = "https://github.com/FREAK-lang-dev/tree-sitter-freak"
 rev = "186ecf6344019574b0f59a968050c00c598e0b62"
+
+[language_servers.freak-lsp]
+name = "freak-lsp"
+languages = ["FREAK"]

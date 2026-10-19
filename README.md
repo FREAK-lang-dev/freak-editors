@@ -21,10 +21,17 @@ definition within a file, and basic diagnostics. When a `freak` 0.15.0 or later
 compiler is installed it also runs `freak check` on open and save and reports
 the compiler's errors until the next edit; without one those diagnostics are
 simply absent. It adds
-no type or borrow analysis of its own. VS Code (`freak.lsp.command`) and Lite XL
-(`server_command`) can launch a different stdio language server instead of the
-bundled one. Zed currently ships snippets and grammar
-support only. Grammar coverage does not
+no type or borrow analysis of its own.
+
+`freak-lsp` is the native language server, written in FREAK on the Maverick
+(V4) compiler in Freak-lang (`python src/compiler/v4/build_lsp.py`). It answers
+hover, go to definition, document symbols and completion from the compiler's
+own queries, runs `freak check` on open and save, and can add live Maverick
+diagnostics on every edit. VS Code starts it automatically when it is on PATH
+or next to the compiler (`freak.lsp.server`, default `auto`, falls back to the
+Python server); Zed starts it when it is on PATH; Lite XL uses it with
+`server_command = { "freak-lsp" }`. `freak.lsp.command` and `server_command`
+can still launch any other stdio language server. Grammar coverage does not
 imply that every highlighted form is implemented in the shipping compiler.
 
 ## Build and verify
