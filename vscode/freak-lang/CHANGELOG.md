@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- `freak.lsp.server` (`auto`, `freak-lsp`, `python`): `auto` starts the native
+  `freak-lsp` server when it is on PATH or next to the compiler, and keeps the
+  bundled Python server otherwise
+- `freak.diagnostics.maverick` for live Maverick (V4) diagnostics from `freak-lsp`
+- Zed launches `freak-lsp` for `.fk` files when it is on PATH
+
 ## [0.15.1] - 2026-10-18
 
 ### Added

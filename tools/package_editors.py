@@ -85,6 +85,7 @@ def package(output: Path, version: str) -> list[Path]:
             "languages/freak/config.toml", "languages/freak/highlights.scm",
             "languages/freak/brackets.scm", "languages/freak/indents.scm",
             "languages/freak/outline.scm",
+            "Cargo.toml", "src/lib.rs",
         ])
         shutil.copyfile(ROOT / "LICENSE", zed / "LICENSE")
         manifest_path = zed / "extension.toml"

@@ -234,6 +234,21 @@ async function startServer(context) {
         return launchClient({ command: command[0], args: command.slice(1), transport: TransportKind.stdio }, config);
     }
 
+    // The native server (freak-lsp) answers from the Maverick compiler's
+    // queries. `auto` uses it when it is installed and keeps the Python
+    // server otherwise.
+    const choice = config.get('lsp.server', 'auto');
+    if (choice !== 'python') {
+        const native = findNativeServer();
+        if (native) {
+            outputChannel.appendLine(`Server: ${native}`);
+            return launchClient({ command: native, args: [], transport: TransportKind.stdio }, config);
+        }
+        if (choice === 'freak-lsp') {
+            vscode.window.showWarningMessage('FREAK: freak-lsp was not found on PATH or next to the compiler; using the bundled Python server.');
+        }
+    }
+
     // Find python
     const pythonPath = config.get('lsp.pythonPath', '') || findPython();
     if (!pythonPath) {
@@ -286,6 +301,7 @@ async function launchClient(serverOptions, config) {
         initializationOptions: {
             compilerPath: compilerPath(),
             compilerDiagnostics: config.get('diagnostics.compiler', true),
+            maverickDiagnostics: config.get('diagnostics.maverick', false),
         },
     };
 
@@ -324,6 +340,23 @@ function restartServer(context) {
     };
     restarting = restarting.then(run, run);
     return restarting;
+}
+
+// freak-lsp on PATH, else beside the configured compiler.
+function findNativeServer() {
+    const names = process.platform === 'win32' ? ['freak-lsp.exe', 'freak-lsp'] : ['freak-lsp'];
+    const dirs = (process.env.PATH || '').split(path.delimiter).filter(Boolean);
+    const compiler = compilerPath();
+    if (path.isAbsolute(compiler)) dirs.unshift(path.dirname(compiler));
+    for (const dir of dirs) {
+        for (const name of names) {
+            const candidate = path.join(dir, name);
+            try {
+                if (fs.statSync(candidate).isFile()) return candidate;
+            } catch (e) {}
+        }
+    }
+    return null;
 }
 
 function findPython() {
