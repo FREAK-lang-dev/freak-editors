@@ -116,9 +116,9 @@ require("freak").setup({
 ```
 
 `plugin/freak.lua` calls `setup()` with these defaults unless your config
-already called it. A later `setup()` call replaces the options; language servers
-that are already running keep their old command until you restart them
-(`:LspRestart`, or reopen Neovim). Set `vim.g.freak_no_setup = true` before
+already called it. A later `setup()` call replaces the options, but a language
+server that is already running keeps the `lsp_cmd` and `lsp_init_options` it
+started with; reopen Neovim to start it with the new ones. Set `vim.g.freak_no_setup = true` before
 plugins load to skip the automatic call, for example when you configure
 `freak-lsp` through nvim-lspconfig yourself.
 
