@@ -1,0 +1,42 @@
+-- TODO: Vim and Neovim highlighting fixture. Indentation here is canonical.
+use std::fs
+
+@protagonist
+shape Eishi {
+    name: word
+    power: int
+}
+
+route Tier {
+    Soldier,
+    Laser,
+}
+
+impl Eishi {
+    task shout(e: Eishi) -> word {
+        give back "{e.name}!"
+    }
+}
+
+task scan(level: int) -> maybe<int> {
+    pilot mut mask = 0xFF
+    pilot ratio = 3.14
+    when level {
+        0 -> give back nobody
+        _ -> give back some(level)
+    }
+}
+
+task main() -> void {
+    pilot eishi = Eishi { name: "Takeru", power: 9000 }
+    say eishi.power_up(1)
+    pilot data = fs::read("data.txt")
+    if eishi.power > 9000 and not false {
+        say "over {eishi.power}"
+    } else {
+        say "just {eishi.power}"
+    }
+    eventually {
+        say "it was always going to end this way"
+    }
+}

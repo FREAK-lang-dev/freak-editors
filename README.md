@@ -1,7 +1,7 @@
 # FREAK editors
 
 Editor integrations and release packaging for the [FREAK language](https://github.com/FREAK-lang-dev/Freak-lang).
-This repository owns the VS Code, Zed and Lite XL plugins, their snippets and
+This repository owns the VS Code, Zed, Lite XL and Vim/Neovim plugins, their snippets and
 queries, the lightweight Python LSP, and the tooling that produces release
 downloads. The current release tracks FREAK 0.15.1.
 
@@ -10,9 +10,10 @@ downloads. The current release tracks FREAK 0.15.1.
 | `freak-vscode-<version>.vsix` | VS Code: **Extensions: Install from VSIX...** | Highlighting, snippets, brackets, file icon, Run/Check/Build/Test and Hangar commands, bundled Python LSP client/server |
 | `freak-zed-<version>.zip` | Extract, then Zed: **Install Dev Extension** on `freak-zed` | Highlighting, the same snippets, brackets, indentation, outline |
 | `freak-litexl-<version>.zip` | Extract into Lite XL's `plugins` directory | Highlighting, comment toggling, bundled Python LSP server for the `lsp` plugin |
+| `freak-vim-<version>.zip` | Extract into a Vim or Neovim `pack/*/start` directory | Highlighting, indentation, comments; Neovim tree-sitter highlights and folds, `freak-lsp` startup, bundled Python LSP server |
 
-See the [VS Code](vscode/freak-lang/README.md), [Zed](zed/freak-lang/README.md)
-and [Lite XL](litexl/README.md) installation guides. Packages include licenses
+See the [VS Code](vscode/freak-lang/README.md), [Zed](zed/freak-lang/README.md),
+[Lite XL](litexl/README.md) and [Vim/Neovim](vim/README.md) installation guides. Packages include licenses
 and ship with `SHA256SUMS`. VS Code-compatible editors that support VSIX
 installation may use that asset; no marketplace publications are added here.
 
@@ -29,7 +30,7 @@ hover, go to definition, document symbols and completion from the compiler's
 own queries, runs `freak check` on open and save, and can add live Maverick
 diagnostics on every edit. VS Code starts it automatically when it is on PATH
 or next to the compiler (`freak.lsp.server`, default `auto`, falls back to the
-Python server); Zed starts it when it is on PATH; Lite XL uses it with
+Python server); Zed and Neovim start it when it is on PATH; Lite XL uses it with
 `server_command = { "freak-lsp" }`. `freak.lsp.command` and `server_command`
 can still launch any other stdio language server. Grammar coverage does not
 imply that every highlighted form is implemented in the shipping compiler.
@@ -44,6 +45,7 @@ npm ci
 python -m pip install -r lsp/requirements.txt
 npm test
 python -u tests/editor_grammars.py --remote
+python -u tests/vim_highlighting.py --treesitter   # needs vim, nvim and a C compiler
 python -u tools/package_editors.py --output dist/editors
 python -u tests/editor_packages.py --artifacts dist/editors
 python -u tests/lsp_stdio.py dist/editors/freak-vscode-0.15.1.vsix

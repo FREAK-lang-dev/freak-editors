@@ -3,12 +3,15 @@
 import argparse
 import json
 import re
+import sys
 import tomllib
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+from package_editors import VIM_FILES  # noqa: E402
 
 
 def verify(artifacts: Path, version: str) -> None:
@@ -72,9 +75,18 @@ def verify(artifacts: Path, version: str) -> None:
         assert archive.read("language_freak/freak_lsp.py") == (ROOT / "lsp/freak_lsp.py").read_bytes()
         assert archive.read("language_freak/requirements.txt") == (ROOT / "lsp/requirements.txt").read_bytes()
 
+    with zipfile.ZipFile(artifacts / f"freak-vim-{version}.zip") as archive:
+        names = set(archive.namelist())
+        assert names == {f"freak-vim/{name}" for name in (
+            *VIM_FILES, "LICENSE", "lsp/freak_lsp.py", "lsp/requirements.txt")}, names
+        for name in VIM_FILES:
+            assert archive.read(f"freak-vim/{name}") == (ROOT / "vim" / name).read_bytes(), name
+        assert archive.read("freak-vim/lsp/freak_lsp.py") == (ROOT / "lsp/freak_lsp.py").read_bytes()
+        assert b"setfiletype freak" in archive.read("freak-vim/ftdetect/freak.vim")
+
     sums = (artifacts / "SHA256SUMS").read_text(encoding="utf-8").split()[1::2]
     assert sums == [f"freak-vscode-{version}.vsix", f"freak-zed-{version}.zip",
-                    f"freak-litexl-{version}.zip"], sums
+                    f"freak-litexl-{version}.zip", f"freak-vim-{version}.zip"], sums
 
     for editor in ("vscode", "zed"):
         source = ROOT / f"{editor}/freak-lang/snippets/freak.json"

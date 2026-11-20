@@ -2,8 +2,8 @@
 """Build release editor assets without modifying their source manifests.
 
 Requires Node.js and `npm ci`. Standalone versions come from VERSION; callers may supply a compiler release version.
-Zed retains its independently pinned tree-sitter-freak revision. Lite XL plugins
-carry no version manifest; the version appears only in the archive name.
+Zed and Neovim retain their independently pinned tree-sitter-freak revision. Lite XL
+and Vim plugins carry no version manifest; the version appears only in the archive name.
 """
 from __future__ import annotations
 
@@ -19,6 +19,13 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+VIM_FILES = [
+    "README.md", "ftdetect/freak.vim", "ftplugin/freak.vim", "indent/freak.vim",
+    "syntax/freak.vim", "plugin/freak.lua", "lua/freak/init.lua",
+    "queries/freak/highlights.scm", "queries/freak/folds.scm",
+]
 
 
 def read_version() -> str:
@@ -49,7 +56,8 @@ def package(output: Path, version: str) -> list[Path]:
     output.mkdir(parents=True, exist_ok=True)
     assets = [output / f"freak-vscode-{version}.vsix",
               output / f"freak-zed-{version}.zip",
-              output / f"freak-litexl-{version}.zip"]
+              output / f"freak-litexl-{version}.zip",
+              output / f"freak-vim-{version}.zip"]
     with tempfile.TemporaryDirectory(prefix="freak-editors-") as temporary:
         stage = Path(temporary)
         vscode = stage / "vscode"
@@ -103,6 +111,16 @@ def package(output: Path, version: str) -> list[Path]:
         shutil.copyfile(ROOT / "lsp/freak_lsp.py", litexl / "freak_lsp.py")
         shutil.copyfile(ROOT / "lsp/requirements.txt", litexl / "requirements.txt")
         write_zip(assets[2], stage, litexl)
+
+        # One runtime directory for Vim and Neovim: extract it into a pack/*/start
+        # directory, or point a plugin manager at it.
+        vim = stage / "freak-vim"
+        copy_files(ROOT / "vim", vim, VIM_FILES)
+        shutil.copyfile(ROOT / "LICENSE", vim / "LICENSE")
+        (vim / "lsp").mkdir()
+        shutil.copyfile(ROOT / "lsp/freak_lsp.py", vim / "lsp/freak_lsp.py")
+        shutil.copyfile(ROOT / "lsp/requirements.txt", vim / "lsp/requirements.txt")
+        write_zip(assets[3], stage, vim)
     checksums = "".join(f"{hashlib.sha256(asset.read_bytes()).hexdigest()}  {asset.name}\n" for asset in assets)
     (output / "SHA256SUMS").write_text(checksums, encoding="utf-8", newline="\n")
     return assets
