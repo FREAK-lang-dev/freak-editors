@@ -238,6 +238,8 @@ for name, path in pairs(files) do
   local buf = vim.api.nvim_get_current_buf()
   buffers[name] = buf
   results.highlighting[name] = vim.treesitter.highlighter.active[buf] ~= nil
+  -- Headless Neovim never redraws, and 0.11 only parses for a redraw.
+  vim.treesitter.get_parser(buf, "freak"):parse(true)
 end
 for _, kind in ipairs({{ "highlights", "folds" }}) do
   local ok, query = pcall(vim.treesitter.query.get, "freak", kind)
