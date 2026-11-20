@@ -224,12 +224,12 @@ def treesitter_checks(nvim: str, temporary: Path, grammar: Path | None) -> None:
               for line, column in [position(path, context, token)]]
     files = {fixture.name: str(fixture) for fixture in FIXTURES}
     script.write_text(f"""
-vim.opt.runtimepath:prepend({json.dumps(str(RUNTIME))})
+vim.opt.runtimepath:prepend({json.dumps(str(RUNTIME), ensure_ascii=False)})
 vim.cmd("filetype plugin indent on")
 vim.cmd("syntax on")
-vim.treesitter.language.add("freak", {{ path = {json.dumps(str(library))} }})
+vim.treesitter.language.add("freak", {{ path = {json.dumps(str(library), ensure_ascii=False)} }})
 require("freak").setup({{ lsp = false }})
-local files = vim.json.decode({json.dumps(json.dumps(files))})
+local files = vim.json.decode({json.dumps(json.dumps(files), ensure_ascii=False)})
 local probes = vim.json.decode({json.dumps(json.dumps(probes))})
 local results = {{ captures = {{}}, highlighting = {{}}, queries = {{}} }}
 local buffers = {{}}
@@ -250,7 +250,7 @@ for _, probe in ipairs(probes) do
   end
   table.insert(results.captures, names)
 end
-vim.fn.writefile({{ vim.json.encode(results) }}, {json.dumps(str(output))})
+vim.fn.writefile({{ vim.json.encode(results) }}, {json.dumps(str(output), ensure_ascii=False)})
 vim.cmd("qall!")
 """, encoding="utf-8")
     results = run_editor([nvim, "--headless", "-u", "NONE", "-i", "NONE", "-n"], script, output)
