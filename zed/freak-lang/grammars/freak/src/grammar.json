@@ -3356,7 +3356,7 @@
     },
     "method_call": {
       "type": "PREC_LEFT",
-      "value": 9,
+      "value": 10,
       "content": {
         "type": "SEQ",
         "members": [

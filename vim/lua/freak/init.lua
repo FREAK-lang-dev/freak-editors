@@ -7,7 +7,7 @@ local M = {}
 -- with zed/freak-lang/extension.toml; tests/vim_highlighting.py checks it.
 M.grammar = {
   url = "https://github.com/FREAK-lang-dev/tree-sitter-freak",
-  revision = "186ecf6344019574b0f59a968050c00c598e0b62",
+  revision = "a4c96f6a77649673cde0e4245d81888fa43ffd6e",
 }
 
 local defaults = {

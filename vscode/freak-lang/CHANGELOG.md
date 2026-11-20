@@ -1,13 +1,20 @@
 # Changelog
 
-## [Unreleased]
+## [0.15.2] - 2026-11-20
 
 ### Added
+- Vim and Neovim support (`freak-vim-<version>.zip`): highlighting, indentation
+  and comments; in Neovim, tree-sitter highlights and folds through
+  nvim-treesitter and automatic `freak-lsp` startup
 - `freak.lsp.server` (`auto`, `freak-lsp`, `python`): `auto` starts the native
   `freak-lsp` server when it is on PATH or next to the compiler, and keeps the
   bundled Python server otherwise
 - `freak.diagnostics.maverick` for live Maverick (V4) diagnostics from `freak-lsp`
 - Zed launches `freak-lsp` for `.fk` files when it is on PATH
+
+### Fixed
+- Method calls such as `a.b(1)` highlight as calls in Zed and Neovim
+  (tree-sitter-freak now parses them as method calls)
 
 ## [0.15.1] - 2026-10-18
 
