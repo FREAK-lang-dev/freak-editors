@@ -56,6 +56,12 @@ jobs:
         run: |
           npm test
           python -u tests/editor_grammars.py --remote
+      - name: Verify Vim and Neovim highlighting, indentation and tree-sitter captures
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q vim neovim
+          python -u tests/vim_highlighting.py --require --treesitter
       - name: Build and verify installable editor assets
         run: |
           python -u tools/package_editors.py --version "$EDITOR_VERSION" --output dist/editors
