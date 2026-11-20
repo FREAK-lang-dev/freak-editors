@@ -52,6 +52,11 @@ function! FreakIndent(lnum) abort
   let closes = s:Count(rest, '[})\]]') + s:Count(rest, '\<done\>')
 
   let ind = indent(prev)
+  " `}}` closes two blocks; the line's own indent only accounts for the first.
+  let extra = s:Count(leading, '[})\]]') + s:Count(leading, '\<done\>') - 1
+  if extra > 0
+    let ind -= extra * shiftwidth()
+  endif
   if opens > closes
     let ind += shiftwidth()
   elseif closes > opens

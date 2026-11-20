@@ -78,6 +78,8 @@ local function lsp_cmd()
   end
 end
 
+-- Language servers already running keep the command and options they were
+-- started with; a later setup() call applies to servers started after it.
 local function attach(buf)
   if M.options.treesitter then
     -- Fails quietly when the parser isn't installed; regex syntax stays on.
@@ -96,7 +98,11 @@ local function attach(buf)
   end
 end
 
+-- True once setup() has run, so plugin/freak.lua doesn't reset a user's call.
+M.configured = false
+
 function M.setup(opts)
+  M.configured = true
   M.options = vim.tbl_deep_extend("force", vim.deepcopy(defaults), opts or {})
   M.group = vim.api.nvim_create_augroup("freak", { clear = true })
   -- ftdetect/freak.vim covers plugin managers that add vim/ at startup; this

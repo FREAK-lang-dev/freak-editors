@@ -40,3 +40,11 @@ task main() -> void {
         say "it was always going to end this way"
     }
 }
+
+task nested() -> void {
+    if true {
+        if false {
+            say "deep"
+        }}
+    say "after"
+}
