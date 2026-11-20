@@ -371,8 +371,10 @@ module.exports = grammar({
       seq(field("scope", choice($.identifier, $.type_identifier)),
         "::", field("name", $.identifier)),
 
+    // Above field_access, so `a.b(` shifts into a call instead of reducing
+    // `a.b` and starting a parenthesized expression statement.
     method_call: ($) =>
-      prec.left(9, seq(
+      prec.left(10, seq(
         field("object", $._expression), ".",
         field("method", $.identifier),
         "(", optional(commaSep1($._expression)), ")")),

@@ -3,7 +3,7 @@
 Editor integrations and release packaging for the [FREAK language](https://github.com/FREAK-lang-dev/Freak-lang).
 This repository owns the VS Code, Zed, Lite XL and Vim/Neovim plugins, their snippets and
 queries, the lightweight Python LSP, and the tooling that produces release
-downloads. The current release tracks FREAK 0.15.1.
+downloads. The current release, 0.15.2, works with FREAK 0.15.1.
 
 | Download | Install | Included support |
 |---|---|---|
@@ -48,7 +48,7 @@ python -u tests/editor_grammars.py --remote
 python -u tests/vim_highlighting.py --treesitter   # needs vim, nvim and a C compiler
 python -u tools/package_editors.py --output dist/editors
 python -u tests/editor_packages.py --artifacts dist/editors
-python -u tests/lsp_stdio.py dist/editors/freak-vscode-0.15.1.vsix
+python -u tests/lsp_stdio.py dist/editors/freak-vscode-0.15.2.vsix
 ```
 
 Prefer a Python virtual environment. The packager installs locked VS Code runtime

@@ -101,6 +101,7 @@ CAPTURES = [
     (EXTENDED, "pilot mut", "mut", "keyword.modifier"),
     (EXTENDED, "0xFF", "0xFF", "number"),
     (EXTENDED, "give back nobody", "nobody", "constant.builtin"),
+    (EXTENDED, "power_up", "power_up", "function.method.call"),
     (EXTENDED, "fs::read", "fs", "module"),
     (EXTENDED, "fs::read", "read", "function.call"),
     (EXTENDED, "and not false", "and", "keyword.operator"),
